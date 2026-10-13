@@ -1,6 +1,7 @@
 # Repository scope: the two project folders selected for upload.
 /*
 !/.gitignore
+!/README.md
 !/LungLogic_DualBranch_PID_Simulation_Arduino/
 !/实验/
 
