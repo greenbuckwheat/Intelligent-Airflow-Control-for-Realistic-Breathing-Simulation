@@ -1,0 +1,597 @@
+{
+  "files": [
+    {
+      "file": "0.csv",
+      "sha256": "6ffe476decca9807ff2e4a5e96ebd828d3710d7a5213139de330aa148eaf74ef",
+      "date": "2026-10-09T14:53:58.502+11:00",
+      "samples": 5671,
+      "max_gap_s": 0.07000000000000028,
+      "status": [
+        "OK"
+      ],
+      "faults": [
+        "NONE"
+      ]
+    },
+    {
+      "file": "2.csv",
+      "sha256": "242b962c92b7b5ac000785a1b691e60d752614bc56f4bd62776a5ec09b423c02",
+      "date": "2026-10-09T14:56:06.072+11:00",
+      "samples": 5468,
+      "max_gap_s": 0.07000000000000739,
+      "status": [
+        "OK"
+      ],
+      "faults": [
+        "NONE"
+      ]
+    },
+    {
+      "file": "3.2.csv",
+      "sha256": "4a45d3fb0ad511680979a766e6b37b9bf249f6a3867f2e06804e19e90b1cebf2",
+      "date": "2026-10-09T14:58:16.475+11:00",
+      "samples": 4341,
+      "max_gap_s": 0.07000000000000028,
+      "status": [
+        "OK"
+      ],
+      "faults": [
+        "NONE"
+      ]
+    },
+    {
+      "file": "3.5.csv",
+      "sha256": "84e1eacc869e4422daac9409acc36476ad08e696eb6402816d332f4db55f8f8e",
+      "date": "2026-10-09T15:00:25.097+11:00",
+      "samples": 10569,
+      "max_gap_s": 0.06900000000000261,
+      "status": [
+        "OK"
+      ],
+      "faults": [
+        "NONE"
+      ]
+    },
+    {
+      "file": "3.6.csv",
+      "sha256": "6e1b7a6d97e82a9bf424f5a643cd324567f0e9fc930389ba0b7a933ad7275e1e",
+      "date": "2026-10-09T15:04:19.990+11:00",
+      "samples": 5035,
+      "max_gap_s": 0.06899999999999551,
+      "status": [
+        "OK"
+      ],
+      "faults": [
+        "NONE"
+      ]
+    },
+    {
+      "file": "3.7.csv",
+      "sha256": "d5a0334b6c72887bfe2578ed7ded57975f08d3450c3448b1bfbdf3e099c4be40",
+      "date": "2026-10-09T15:06:15.751+11:00",
+      "samples": 4570,
+      "max_gap_s": 0.06700000000000728,
+      "status": [
+        "OK"
+      ],
+      "faults": [
+        "NONE"
+      ]
+    },
+    {
+      "file": "3.8.csv",
+      "sha256": "4a387f8c6dfdf673df294dbbfb0df60e10ba0682cecb04c8f3ba8633ca88b794",
+      "date": "2026-10-09T15:08:04.930+11:00",
+      "samples": 6635,
+      "max_gap_s": 0.06800000000000495,
+      "status": [
+        "OK"
+      ],
+      "faults": [
+        "NONE"
+      ]
+    },
+    {
+      "file": "3.9.csv",
+      "sha256": "43e52ae83d5aacf68531644a050a2a279507b0d44214e4a99053c1221fd9d788",
+      "date": "2026-10-09T15:10:34.443+11:00",
+      "samples": 14924,
+      "max_gap_s": 0.06999999999999318,
+      "status": [
+        "OK"
+      ],
+      "faults": [
+        "NONE"
+      ]
+    },
+    {
+      "file": "4.0.csv",
+      "sha256": "456d5344053bac2bc097928f85154942d514974553084314e02f2112d6f553ea",
+      "date": "2026-10-09T15:15:47.952+11:00",
+      "samples": 14842,
+      "max_gap_s": 0.0660000000000025,
+      "status": [
+        "OK"
+      ],
+      "faults": [
+        "NONE"
+      ]
+    },
+    {
+      "file": "4.05.csv",
+      "sha256": "50f5189fb697894c60283c3e05b2352c4dc81ef83dc276dfb64e596d6be4d41e",
+      "date": "2026-10-09T15:21:06.916+11:00",
+      "samples": 11558,
+      "max_gap_s": 0.06800000000001205,
+      "status": [
+        "OK"
+      ],
+      "faults": [
+        "NONE"
+      ]
+    },
+    {
+      "file": "4.1.csv",
+      "sha256": "659927ae9bfa1d2515ac112d46e56ede9f15f3eaf9bdb3d1d17701faac7f785d",
+      "date": "2026-10-09T15:25:09.974+11:00",
+      "samples": 17329,
+      "max_gap_s": 0.06999999999999318,
+      "status": [
+        "OK"
+      ],
+      "faults": [
+        "NONE"
+      ]
+    },
+    {
+      "file": "4.15.csv",
+      "sha256": "42c5fff12f8673a3ff71f95ffce98685a6f08304b0b0b41bc984eb81358acefa",
+      "date": "2026-10-09T15:31:10.259+11:00",
+      "samples": 25793,
+      "max_gap_s": 0.07000000000005002,
+      "status": [
+        "OK"
+      ],
+      "faults": [
+        "NONE"
+      ]
+    },
+    {
+      "file": "4.18.csv",
+      "sha256": "911ad0b9981135bd8e2d4906ab37aa49bbcc7b99c490cd97979b85f92e6bc0f0",
+      "date": "2026-10-09T15:39:59.818+11:00",
+      "samples": 4780,
+      "max_gap_s": 0.06499999999999995,
+      "status": [
+        "OK"
+      ],
+      "faults": [
+        "NONE"
+      ]
+    },
+    {
+      "file": "4.2.csv",
+      "sha256": "24e9a2697a2588c54030dedb2d67f84a6489e43d11452e36ad519c9023560eeb",
+      "date": "2026-10-09T15:42:18.507+11:00",
+      "samples": 7007,
+      "max_gap_s": 0.06599999999998829,
+      "status": [
+        "OK"
+      ],
+      "faults": [
+        "NONE"
+      ]
+    }
+  ],
+  "summary": [
+    {
+      "voltage": 0.0,
+      "direction": "ATM",
+      "n": 3,
+      "total": 7,
+      "tau_s": 2.693980144851356,
+      "amplitude_ml": 2039.6920395844434,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 1.9225163327811083,
+      "tau_fixed_leak_only_s": 2.693980144851356,
+      "amplitude_fixed_leak_only_ml": 2039.6920395844434
+    },
+    {
+      "voltage": 0.0,
+      "direction": "VAC",
+      "n": 4,
+      "total": 4,
+      "tau_s": 1.697203915938858,
+      "amplitude_ml": 2301.7576769890966,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 1.3048694185533734,
+      "tau_fixed_leak_only_s": 1.697203915938858,
+      "amplitude_fixed_leak_only_ml": 2301.7576769890966
+    },
+    {
+      "voltage": 2.0,
+      "direction": "ATM",
+      "n": 1,
+      "total": 6,
+      "tau_s": 2.48121568053111,
+      "amplitude_ml": 1959.4602624269157,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 1.8437444581214872,
+      "tau_fixed_leak_only_s": 2.48121568053111,
+      "amplitude_fixed_leak_only_ml": 1959.4602624269157
+    },
+    {
+      "voltage": 2.0,
+      "direction": "VAC",
+      "n": 5,
+      "total": 5,
+      "tau_s": 1.5557784733506281,
+      "amplitude_ml": 2186.6188661277265,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 1.3358869671879752,
+      "tau_fixed_leak_only_s": 1.5557784733506281,
+      "amplitude_fixed_leak_only_ml": 2186.6188661277265
+    },
+    {
+      "voltage": 3.2,
+      "direction": "ATM",
+      "n": 1,
+      "total": 4,
+      "tau_s": 2.585691927413052,
+      "amplitude_ml": 1999.7130215660618,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 1.9467397184827047,
+      "tau_fixed_leak_only_s": 2.585691927413052,
+      "amplitude_fixed_leak_only_ml": 1999.7130215660618
+    },
+    {
+      "voltage": 3.2,
+      "direction": "VAC",
+      "n": 4,
+      "total": 4,
+      "tau_s": 1.6452463380922415,
+      "amplitude_ml": 2264.0335288418264,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 1.376251466510124,
+      "tau_fixed_leak_only_s": 1.6452463380922415,
+      "amplitude_fixed_leak_only_ml": 2264.0335288418264
+    },
+    {
+      "voltage": 3.5,
+      "direction": "ATM",
+      "n": 7,
+      "total": 9,
+      "tau_s": 2.912587192594311,
+      "amplitude_ml": 2027.8242117121779,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 2.1845698870800536,
+      "tau_fixed_leak_only_s": 2.912587192594311,
+      "amplitude_fixed_leak_only_ml": 2027.8242117121779
+    },
+    {
+      "voltage": 3.5,
+      "direction": "VAC",
+      "n": 9,
+      "total": 9,
+      "tau_s": 1.6771939812121546,
+      "amplitude_ml": 2221.769511030399,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 1.2925651388802633,
+      "tau_fixed_leak_only_s": 1.6771939812121546,
+      "amplitude_fixed_leak_only_ml": 2221.769511030399
+    },
+    {
+      "voltage": 3.6,
+      "direction": "ATM",
+      "n": 4,
+      "total": 4,
+      "tau_s": 3.117742472228744,
+      "amplitude_ml": 2047.633470373812,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 2.31333525217606,
+      "tau_fixed_leak_only_s": 3.117742472228744,
+      "amplitude_fixed_leak_only_ml": 2047.633470373812
+    },
+    {
+      "voltage": 3.6,
+      "direction": "VAC",
+      "n": 4,
+      "total": 4,
+      "tau_s": 1.6239739521825274,
+      "amplitude_ml": 2205.9561441464275,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 1.3001302283679284,
+      "tau_fixed_leak_only_s": 1.6239739521825274,
+      "amplitude_fixed_leak_only_ml": 2205.9561441464275
+    },
+    {
+      "voltage": 3.7,
+      "direction": "ATM",
+      "n": 3,
+      "total": 3,
+      "tau_s": 3.154095171071744,
+      "amplitude_ml": 1965.8927338883793,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 2.401471368608166,
+      "tau_fixed_leak_only_s": 3.154095171071744,
+      "amplitude_fixed_leak_only_ml": 1965.8927338883793
+    },
+    {
+      "voltage": 3.7,
+      "direction": "VAC",
+      "n": 3,
+      "total": 3,
+      "tau_s": 1.6070265819337601,
+      "amplitude_ml": 2237.5754050938003,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 1.1633555629779593,
+      "tau_fixed_leak_only_s": 1.6070265819337601,
+      "amplitude_fixed_leak_only_ml": 2237.5754050938003
+    },
+    {
+      "voltage": 3.8,
+      "direction": "ATM",
+      "n": 3,
+      "total": 5,
+      "tau_s": 3.1935864324815917,
+      "amplitude_ml": 1996.367930729419,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 2.496081833118,
+      "tau_fixed_leak_only_s": 3.1935864324815917,
+      "amplitude_fixed_leak_only_ml": 1996.367930729419
+    },
+    {
+      "voltage": 3.8,
+      "direction": "VAC",
+      "n": 5,
+      "total": 5,
+      "tau_s": 1.6650575922644784,
+      "amplitude_ml": 2212.0066604773147,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 1.3262918951589553,
+      "tau_fixed_leak_only_s": 1.6650575922644784,
+      "amplitude_fixed_leak_only_ml": 2212.0066604773147
+    },
+    {
+      "voltage": 3.9,
+      "direction": "ATM",
+      "n": 7,
+      "total": 9,
+      "tau_s": 3.230635851864412,
+      "amplitude_ml": 1852.7414182675673,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 2.718191670900904,
+      "tau_fixed_leak_only_s": 3.230635851864412,
+      "amplitude_fixed_leak_only_ml": 1852.7414182675673
+    },
+    {
+      "voltage": 3.9,
+      "direction": "VAC",
+      "n": 9,
+      "total": 9,
+      "tau_s": 1.7135321888412531,
+      "amplitude_ml": 2243.9785285943503,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 1.2668694006667707,
+      "tau_fixed_leak_only_s": 1.7135321888412531,
+      "amplitude_fixed_leak_only_ml": 2243.9785285943503
+    },
+    {
+      "voltage": 4.0,
+      "direction": "ATM",
+      "n": 8,
+      "total": 9,
+      "tau_s": 4.050482011306617,
+      "amplitude_ml": 1869.37921591726,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 3.4489336191040385,
+      "tau_fixed_leak_only_s": 4.050482011306617,
+      "amplitude_fixed_leak_only_ml": 1869.37921591726
+    },
+    {
+      "voltage": 4.0,
+      "direction": "VAC",
+      "n": 8,
+      "total": 8,
+      "tau_s": 1.8317297250589397,
+      "amplitude_ml": 2277.555488040911,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 1.346988327370858,
+      "tau_fixed_leak_only_s": 1.8317297250589397,
+      "amplitude_fixed_leak_only_ml": 2277.555488040911
+    },
+    {
+      "voltage": 4.05,
+      "direction": "ATM",
+      "n": 6,
+      "total": 7,
+      "tau_s": 4.56174938481195,
+      "amplitude_ml": 1842.8876870782829,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 3.986591087739624,
+      "tau_fixed_leak_only_s": 4.56174938481195,
+      "amplitude_fixed_leak_only_ml": 1842.8876870782829
+    },
+    {
+      "voltage": 4.05,
+      "direction": "VAC",
+      "n": 6,
+      "total": 6,
+      "tau_s": 1.9068999289729107,
+      "amplitude_ml": 2258.7870694820986,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 1.50011913961717,
+      "tau_fixed_leak_only_s": 1.9068999289729107,
+      "amplitude_fixed_leak_only_ml": 2258.7870694820986
+    },
+    {
+      "voltage": 4.1,
+      "direction": "ATM",
+      "n": 7,
+      "total": 7,
+      "tau_s": 5.4181381508846815,
+      "amplitude_ml": 1772.3686766126548,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 4.910620203981452,
+      "tau_fixed_leak_only_s": 5.4181381508846815,
+      "amplitude_fixed_leak_only_ml": 1772.3686766126548
+    },
+    {
+      "voltage": 4.1,
+      "direction": "VAC",
+      "n": 7,
+      "total": 7,
+      "tau_s": 2.2247281541326567,
+      "amplitude_ml": 2311.9187684321405,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 1.5153548904237926,
+      "tau_fixed_leak_only_s": 2.2247281541326567,
+      "amplitude_fixed_leak_only_ml": 2311.9187684321405
+    },
+    {
+      "voltage": 4.15,
+      "direction": "ATM",
+      "n": 9,
+      "total": 10,
+      "tau_s": 7.192448068593229,
+      "amplitude_ml": 1780.2917419119433,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 6.736216270470287,
+      "tau_fixed_leak_only_s": 7.192448068593229,
+      "amplitude_fixed_leak_only_ml": 1780.2917419119433
+    },
+    {
+      "voltage": 4.15,
+      "direction": "VAC",
+      "n": 8,
+      "total": 9,
+      "tau_s": 2.869705412661915,
+      "amplitude_ml": 2327.9165591615324,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 2.259585035032834,
+      "tau_fixed_leak_only_s": 2.869705412661915,
+      "amplitude_fixed_leak_only_ml": 2327.9165591615324
+    },
+    {
+      "voltage": 4.18,
+      "direction": "ATM",
+      "n": 1,
+      "total": 1,
+      "tau_s": 9.258072645375846,
+      "amplitude_ml": 1710.300214452482,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 9.003498822187536,
+      "tau_fixed_leak_only_s": 9.258072645375846,
+      "amplitude_fixed_leak_only_ml": 1710.300214452482
+    },
+    {
+      "voltage": 4.18,
+      "direction": "VAC",
+      "n": 0,
+      "total": 2
+    },
+    {
+      "voltage": 4.2,
+      "direction": "ATM",
+      "n": 0,
+      "total": 3
+    },
+    {
+      "voltage": 4.2,
+      "direction": "VAC",
+      "n": 1,
+      "total": 3,
+      "tau_s": 4.372421383563424,
+      "amplitude_ml": 2399.261680664241,
+      "residual_slm": 0.0,
+      "tau_with_delay_s": 3.5070775194464106,
+      "tau_fixed_leak_only_s": 4.372421383563424,
+      "amplitude_fixed_leak_only_ml": 2399.261680664241
+    },
+    {
+      "voltage": 4.3,
+      "direction": "ATM",
+      "n": 0,
+      "total": 1
+    },
+    {
+      "voltage": 4.3,
+      "direction": "VAC",
+      "n": 0,
+      "total": 1
+    }
+  ],
+  "models": {
+    "ATM": {
+      "tau0_s": 2.693980144851356,
+      "closure_v": 4.3,
+      "dead_zone_v": 3.7767516867222755,
+      "gamma": 0.7828045527879312,
+      "log_rmse": 0.08444746292754737,
+      "closure_sensitivity": [
+        {
+          "closure_v": 4.25,
+          "dead_zone_v": 3.7460293688959387,
+          "gamma": 0.6043770477669407,
+          "log_rmse": 0.0768207001893532
+        },
+        {
+          "closure_v": 4.3,
+          "dead_zone_v": 3.7767516867222755,
+          "gamma": 0.7828045527879312,
+          "log_rmse": 0.08444746292754737
+        },
+        {
+          "closure_v": 4.35,
+          "dead_zone_v": 3.7898126659942566,
+          "gamma": 0.9447631330131523,
+          "log_rmse": 0.09022198115419901
+        }
+      ]
+    },
+    "VAC": {
+      "tau0_s": 1.697203915938858,
+      "closure_v": 4.3,
+      "dead_zone_v": 4.024900658302825,
+      "gamma": 0.9143022681737206,
+      "log_rmse": 0.0415648015874254,
+      "closure_sensitivity": [
+        {
+          "closure_v": 4.25,
+          "dead_zone_v": 4.010860631201772,
+          "gamma": 0.6030866725591886,
+          "log_rmse": 0.03929646528822301
+        },
+        {
+          "closure_v": 4.3,
+          "dead_zone_v": 4.024900658302825,
+          "gamma": 0.9143022681737206,
+          "log_rmse": 0.0415648015874254
+        },
+        {
+          "closure_v": 4.35,
+          "dead_zone_v": 4.029949482258349,
+          "gamma": 1.207432957124313,
+          "log_rmse": 0.043761922002745264
+        }
+      ]
+    }
+  },
+  "parameters": {
+    "tau_in_s": 2.694,
+    "tau_out_s": 1.697,
+    "hardware_model_volume_ml": 2039.7,
+    "hardware_gamma_in": 0.7828,
+    "hardware_gamma_out": 0.9143,
+    "hardware_dead_zone_in_v": 3.7768,
+    "hardware_dead_zone_out_v": 4.0249,
+    "hardware_closure_v": 4.3
+  },
+  "notes": [
+    "No-delay first-order fit for deployment; fixed .931 SLM VAC compensation retained.",
+    "Additional fitted residual and shape delay are sensitivity diagnostics, not deployed parameters.",
+    "User-selected model assumption: 4.3 V is the zero-conductance endpoint for both directions; raw residual observations are retained.",
+    "Model volume is empirical amplitude, not geometric capacity or volume safety limit.",
+    "Initial state/pressure unmeasured; coverage and excursion screening do not prove repeatable initial states."
+  ]
+}

@@ -1,0 +1,44 @@
+# Repository scope: the two project folders selected for upload.
+/*
+!/.gitignore
+!/LungLogic_DualBranch_PID_Simulation_Arduino/
+!/实验/
+
+# Python and local editor caches.
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+**/pytest-cache-files-*/
+**/.vscode/
+**/.venv/
+**/venv/
+
+# Firmware build products; retain experiment CSV/JSON and analysis figures.
+**/output/build*/
+**/output/*_build/
+**/output/*_build_*/
+**/*.o
+**/*.d
+**/*.elf
+**/*.hex
+**/*.bin
+**/*.exe
+**/*.map
+
+# LaTeX intermediate files; retain source documents and exported PDFs.
+**/*.aux
+**/*.log
+**/*.out
+**/*.toc
+**/*.nav
+**/*.snm
+**/*.synctex*
+**/*.fls
+**/*.fdb_latexmk
+
+# Local environment and OS files.
+**/.env
+**/.env.*
+!**/.env.example
+**/Thumbs.db
+**/.DS_Store

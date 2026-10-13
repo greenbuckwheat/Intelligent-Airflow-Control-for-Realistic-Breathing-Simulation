@@ -1,0 +1,208 @@
+[
+  {
+    "file": "0.csv",
+    "samples": 1086,
+    "duration_s": 21.772000000000162,
+    "sensor_status": [
+      "OK"
+    ],
+    "faults": [
+      "NONE"
+    ],
+    "ppv_v": [
+      0.0
+    ],
+    "dt_median_s": 0.01999999999998181,
+    "dt_max_s": 0.05899999999996908,
+    "events": [
+      {
+        "主机时间": "2026-10-07T15:34:58.866+11:00",
+        "MCU时间戳ms": "1239598",
+        "操作事件": "RECORD_START"
+      },
+      {
+        "主机时间": "2026-10-07T15:35:01.454+11:00",
+        "MCU时间戳ms": "1242118",
+        "操作事件": "VAC_ON"
+      },
+      {
+        "主机时间": "2026-10-07T15:35:08.319+11:00",
+        "MCU时间戳ms": "1248997",
+        "操作事件": "VAC_OFF"
+      },
+      {
+        "主机时间": "2026-10-07T15:35:10.566+11:00",
+        "MCU时间戳ms": "1251237",
+        "操作事件": "ATM_ON"
+      },
+      {
+        "主机时间": "2026-10-07T15:35:20.699+11:00",
+        "MCU时间戳ms": "1261390",
+        "操作事件": "RECORD_STOP"
+      }
+    ],
+    "segments": [
+      {
+        "state": 0,
+        "start_s": 0.0,
+        "end_s": 2.6200000000001182,
+        "duration_s": 2.6200000000001182,
+        "min_slm": 0.0,
+        "max_slm": 0.033,
+        "baseline_slm": 0.0,
+        "signed_volume_ml": 0.24199999999990507,
+        "tail_median_slm": 0.0,
+        "peak_time_from_state_s": 0.10000000000013642
+      },
+      {
+        "state": 2,
+        "start_s": 2.6790000000000873,
+        "end_s": 9.479000000000042,
+        "duration_s": 6.7999999999999545,
+        "min_slm": -65.567,
+        "max_slm": 0.0,
+        "baseline_slm": 0.0,
+        "signed_volume_ml": -2002.577333333353,
+        "tail_median_slm": -3.167,
+        "peak_time_from_state_s": 0.05999999999994543,
+        "fitted_volume_ml": 2036.2842446408158,
+        "tau_s": 1.7123147637552014,
+        "apparent_delay_s": 0.15397041046389878,
+        "cumulative_r2": 0.997031418093027,
+        "cumulative_rmse_ml": 30.55733756976973
+      },
+      {
+        "state": 0,
+        "start_s": 9.499000000000024,
+        "end_s": 11.739000000000033,
+        "duration_s": 2.240000000000009,
+        "min_slm": -2.833,
+        "max_slm": 2.733,
+        "baseline_slm": 0.0,
+        "signed_volume_ml": 77.49399999999656,
+        "tail_median_slm": 2.233,
+        "peak_time_from_state_s": 0.0
+      },
+      {
+        "state": 1,
+        "start_s": 11.792000000000144,
+        "end_s": 21.772000000000162,
+        "duration_s": 9.980000000000018,
+        "min_slm": 0.233,
+        "max_slm": 48.267,
+        "baseline_slm": 0.0,
+        "signed_volume_ml": 1582.3799999999903,
+        "tail_median_slm": 0.3,
+        "peak_time_from_state_s": 1.3199999999999363,
+        "fitted_volume_ml": 1571.8077158790484,
+        "tau_s": 1.0822833482055472,
+        "apparent_delay_s": 0.45557425970324594,
+        "cumulative_r2": 0.9917461342366664,
+        "cumulative_rmse_ml": 38.2934259156562
+      }
+    ]
+  },
+  {
+    "file": "0.1.csv",
+    "samples": 1232,
+    "duration_s": 24.705000000000155,
+    "sensor_status": [
+      "OK"
+    ],
+    "faults": [
+      "NONE"
+    ],
+    "ppv_v": [
+      0.0
+    ],
+    "dt_median_s": 0.01999999999998181,
+    "dt_max_s": 0.06400000000007822,
+    "events": [
+      {
+        "主机时间": "2026-10-07T15:36:11.873+11:00",
+        "MCU时间戳ms": "1312590",
+        "操作事件": "RECORD_START"
+      },
+      {
+        "主机时间": "2026-10-07T15:36:15.229+11:00",
+        "MCU时间戳ms": "1315890",
+        "操作事件": "VAC_ON"
+      },
+      {
+        "主机时间": "2026-10-07T15:36:24.914+11:00",
+        "MCU时间戳ms": "1325571",
+        "操作事件": "VAC_OFF"
+      },
+      {
+        "主机时间": "2026-10-07T15:36:26.673+11:00",
+        "MCU时间戳ms": "1327351",
+        "操作事件": "ATM_ON"
+      },
+      {
+        "主机时间": "2026-10-07T15:36:36.634+11:00",
+        "MCU时间戳ms": "1337315",
+        "操作事件": "RECORD_STOP"
+      }
+    ],
+    "segments": [
+      {
+        "state": 1,
+        "start_s": 0.0,
+        "end_s": 3.400000000000091,
+        "duration_s": 3.400000000000091,
+        "min_slm": 0.0,
+        "max_slm": 0.033,
+        "baseline_slm": 0.033,
+        "signed_volume_ml": -0.7259999999999648,
+        "tail_median_slm": 0.033,
+        "peak_time_from_state_s": 0.0
+      },
+      {
+        "state": 2,
+        "start_s": 3.4610000000000127,
+        "end_s": 13.081000000000131,
+        "duration_s": 9.620000000000118,
+        "min_slm": -63.633,
+        "max_slm": 0.033,
+        "baseline_slm": 0.033,
+        "signed_volume_ml": -2020.0993333332506,
+        "tail_median_slm": -1.467,
+        "peak_time_from_state_s": 0.060000000000172804,
+        "fitted_volume_ml": 1998.148003093892,
+        "tau_s": 1.6756240446752464,
+        "apparent_delay_s": 0.12972072762884734,
+        "cumulative_r2": 0.9967861521151314,
+        "cumulative_rmse_ml": 29.10669214990719
+      },
+      {
+        "state": 0,
+        "start_s": 13.101000000000113,
+        "end_s": 14.841000000000122,
+        "duration_s": 1.740000000000009,
+        "min_slm": -1.167,
+        "max_slm": 2.767,
+        "baseline_slm": 0.033,
+        "signed_volume_ml": 63.843000000004864,
+        "tail_median_slm": 2.4,
+        "peak_time_from_state_s": 0.2599999999999909
+      },
+      {
+        "state": 1,
+        "start_s": 14.9050000000002,
+        "end_s": 24.705000000000155,
+        "duration_s": 9.799999999999955,
+        "min_slm": 0.267,
+        "max_slm": 44.133,
+        "baseline_slm": 0.033,
+        "signed_volume_ml": 1599.1098333333189,
+        "tail_median_slm": 0.4,
+        "peak_time_from_state_s": 1.6399999999998727,
+        "fitted_volume_ml": 1591.0214674429897,
+        "tau_s": 1.1621445042086034,
+        "apparent_delay_s": 0.6088030605392689,
+        "cumulative_r2": 0.989297551183069,
+        "cumulative_rmse_ml": 47.279098457482675
+      }
+    ]
+  }
+]

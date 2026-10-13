@@ -1,0 +1,166 @@
+{
+  "zero_file": {
+    "samples": 6454,
+    "duration_s": 129.198,
+    "max_sample_gap_s": 0.055999999999997385,
+    "status": [
+      "OK"
+    ],
+    "faults": [
+      "NONE"
+    ]
+  },
+  "leakage_file": {
+    "samples": 7865,
+    "duration_s": 157.449,
+    "max_sample_gap_s": 0.06800000000000139,
+    "status": [
+      "OK"
+    ],
+    "faults": [
+      "NONE"
+    ]
+  },
+  "zero_stable": {
+    "n": 5554,
+    "mean_slm": 0.003392689953186893,
+    "median_slm": 0.0,
+    "std_slm": 0.011549415859689783,
+    "min_slm": -0.033,
+    "max_slm": 0.033,
+    "p05_slm": 0.0,
+    "p95_slm": 0.033
+  },
+  "zero_by_state": [
+    {
+      "atm": 0,
+      "vac": 0,
+      "ppv_v": 0.0,
+      "n": 2387,
+      "mean_slm": 0.0027235023041474655,
+      "median_slm": 0.0,
+      "std_slm": 0.010566752950561371,
+      "min_slm": -0.033,
+      "max_slm": 0.033,
+      "p05_slm": 0.0,
+      "p95_slm": 0.033
+    },
+    {
+      "atm": 0,
+      "vac": 0,
+      "ppv_v": 5.0,
+      "n": 251,
+      "mean_slm": 0.005258964143426295,
+      "median_slm": 0.0,
+      "std_slm": 0.0143746356033048,
+      "min_slm": -0.033,
+      "max_slm": 0.033,
+      "p05_slm": 0.0,
+      "p95_slm": 0.033
+    },
+    {
+      "atm": 0,
+      "vac": 1,
+      "ppv_v": 0.0,
+      "n": 1297,
+      "mean_slm": 0.002747879722436392,
+      "median_slm": 0.0,
+      "std_slm": 0.010244977582519892,
+      "min_slm": -0.033,
+      "max_slm": 0.033,
+      "p05_slm": 0.0,
+      "p95_slm": 0.033
+    },
+    {
+      "atm": 1,
+      "vac": 0,
+      "ppv_v": 0.0,
+      "n": 1619,
+      "mean_slm": 0.004606547251389747,
+      "median_slm": 0.0,
+      "std_slm": 0.013185013358710928,
+      "min_slm": -0.033,
+      "max_slm": 0.033,
+      "p05_slm": 0.0,
+      "p95_slm": 0.033
+    }
+  ],
+  "zero_exclusion_sensitivity": {
+    "0.5": {
+      "n": 6229,
+      "mean_slm": 0.003312088617755659,
+      "median_slm": 0.0,
+      "std_slm": 0.013684794747338493,
+      "min_slm": -0.067,
+      "max_slm": 0.167,
+      "p05_slm": 0.0,
+      "p95_slm": 0.033
+    },
+    "1": {
+      "n": 6004,
+      "mean_slm": 0.0034022318454363758,
+      "median_slm": 0.0,
+      "std_slm": 0.012009556557858451,
+      "min_slm": -0.033,
+      "max_slm": 0.033,
+      "p05_slm": 0.0,
+      "p95_slm": 0.033
+    },
+    "2": {
+      "n": 5554,
+      "mean_slm": 0.003392689953186893,
+      "median_slm": 0.0,
+      "std_slm": 0.011549415859689783,
+      "min_slm": -0.033,
+      "max_slm": 0.033,
+      "p05_slm": 0.0,
+      "p95_slm": 0.033
+    },
+    "3": {
+      "n": 5104,
+      "mean_slm": 0.0033103448275862072,
+      "median_slm": 0.0,
+      "std_slm": 0.011433023699598312,
+      "min_slm": -0.033,
+      "max_slm": 0.033,
+      "p05_slm": 0.0,
+      "p95_slm": 0.033
+    }
+  },
+  "vac_plateau_after_20s": {
+    "n": 2726,
+    "mean_slm": 0.8891872607528934,
+    "median_slm": 0.8703926899531869,
+    "std_slm": 0.11060178044224604,
+    "min_slm": 0.7033926899531868,
+    "max_slm": 1.1363926899531869,
+    "p05_slm": 0.7363926899531869,
+    "p95_slm": 1.0703926899531868
+  },
+  "closed": {
+    "after_10s": {
+      "n": 1299,
+      "mean_slm": 0.02386597055489625,
+      "median_slm": 0.029607310046813107,
+      "std_slm": 0.01251004492685027,
+      "min_slm": -0.003392689953186893,
+      "max_slm": 0.029607310046813107,
+      "p05_slm": -0.003392689953186893,
+      "p95_slm": 0.029607310046813107
+    },
+    "net_integral_ml": 6.458314488056543,
+    "positive_integral_ml": 11.231039611091072,
+    "negative_integral_ml": -4.7727251230345304
+  },
+  "candidate_zero_offset_slm": 0.003392689953186893,
+  "candidate_gain_in": 1,
+  "candidate_gain_out": 1,
+  "notes": [
+    "User confirmed zero-test steady states are equal-pressure/no-flow.",
+    "Gains are assumed 1, not calibrated. PPV 0 V only for leakage.",
+    "Source setting 40 kPa reported by user; no lung pressure measurement.",
+    "VAC plateau is not a validated transient leakage correction.",
+    "Closed flow near telemetry quantization cannot prove leak-free behavior.",
+    "Two-second exclusion is for calibration statistics, not live control."
+  ]
+}

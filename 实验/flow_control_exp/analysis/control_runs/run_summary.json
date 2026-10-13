@@ -1,0 +1,374 @@
+[
+  {
+    "file": "single_lung_hardware_run_356599273.csv",
+    "configuration": {
+      "control_hz": 100.0,
+      "respiratory_rate_bpm": 6.0,
+      "ie_inspiration": 1.0,
+      "ie_expiration": 2.0,
+      "target_volume_ml": 150.0,
+      "target_fill_time_s": 3.0,
+      "target_expiration_flow_slm": null,
+      "dead_time_s": 0.08,
+      "dead_time_within_cycle": false,
+      "volume_deadline_guard": false,
+      "volume_feedback_source": "oracle",
+      "precondition_s": 8.0,
+      "cycles": 1,
+      "end_volume_ml": 5.0,
+      "max_lung_volume_ml": 250.0,
+      "max_abs_flow_slm": 220.0,
+      "random_seed": 7,
+      "lung": {
+        "capacity_ml": 250.0,
+        "tau_in_s": 2.53,
+        "full_open_fill_time_s": 1.3,
+        "tau_out_s": 1.31,
+        "valve_exponent": 1.15,
+        "transport_delay_s": 0.025,
+        "sensor_tau_s": 0.02,
+        "sensor_noise_slm": 0.1,
+        "sensor_bias_slm": 0.0,
+        "flow_sign": 1,
+        "hardware_model_volume_ml": 1500.0,
+        "hardware_gamma_in": 0.96,
+        "hardware_gamma_out": 1.69,
+        "hardware_dead_zone_in_v": 3.73,
+        "hardware_dead_zone_out_v": 3.98,
+        "hardware_closure_v": 4.2
+      },
+      "pi": {
+        "kp": 0.01,
+        "ki": 0.06,
+        "kd": 0.0,
+        "integral_limit": 0.5,
+        "use_feedforward": true
+      },
+      "smith": {
+        "enabled": false,
+        "delay_s": 0.0,
+        "correction_gain": 0.6
+      },
+      "input_delay": {
+        "enabled": false,
+        "delay_s": 0.0
+      }
+    },
+    "cycles": [
+      {
+        "cycle": 1,
+        "phase": "INSPIRATION",
+        "peak_slm": 26.7,
+        "displayed_volume_max_ml": 220.2,
+        "displayed_volume_end_ml": 220.2,
+        "directional_integral_ml": 216.6966666666668,
+        "directional_integral_after_close_ml": 64.61666666666686
+      },
+      {
+        "cycle": 1,
+        "phase": "EXPIRATION",
+        "peak_slm": -31.93,
+        "displayed_volume_max_ml": 220.2,
+        "displayed_volume_end_ml": 0.0,
+        "directional_integral_ml": -230.1366666666666,
+        "directional_integral_after_close_ml": -11.946666666666761
+      }
+    ]
+  },
+  {
+    "file": "single_lung_hardware_run_356639792.csv",
+    "configuration": {
+      "control_hz": 100.0,
+      "respiratory_rate_bpm": 6.0,
+      "ie_inspiration": 1.0,
+      "ie_expiration": 2.0,
+      "target_volume_ml": 150.0,
+      "target_fill_time_s": 3.0,
+      "target_expiration_flow_slm": null,
+      "dead_time_s": 0.08,
+      "dead_time_within_cycle": false,
+      "volume_deadline_guard": false,
+      "volume_feedback_source": "oracle",
+      "precondition_s": 8.0,
+      "cycles": 5,
+      "end_volume_ml": 5.0,
+      "max_lung_volume_ml": 250.0,
+      "max_abs_flow_slm": 220.0,
+      "random_seed": 7,
+      "lung": {
+        "capacity_ml": 250.0,
+        "tau_in_s": 2.53,
+        "full_open_fill_time_s": 1.3,
+        "tau_out_s": 1.31,
+        "valve_exponent": 1.15,
+        "transport_delay_s": 0.025,
+        "sensor_tau_s": 0.02,
+        "sensor_noise_slm": 0.1,
+        "sensor_bias_slm": 0.0,
+        "flow_sign": 1,
+        "hardware_model_volume_ml": 1500.0,
+        "hardware_gamma_in": 0.96,
+        "hardware_gamma_out": 1.69,
+        "hardware_dead_zone_in_v": 3.73,
+        "hardware_dead_zone_out_v": 3.98,
+        "hardware_closure_v": 4.2
+      },
+      "pi": {
+        "kp": 0.01,
+        "ki": 0.06,
+        "kd": 0.0,
+        "integral_limit": 0.5,
+        "use_feedforward": true
+      },
+      "smith": {
+        "enabled": false,
+        "delay_s": 0.0,
+        "correction_gain": 0.6
+      },
+      "input_delay": {
+        "enabled": false,
+        "delay_s": 0.0
+      }
+    },
+    "cycles": [
+      {
+        "cycle": 1,
+        "phase": "INSPIRATION",
+        "peak_slm": 23.37,
+        "displayed_volume_max_ml": 212.9,
+        "displayed_volume_end_ml": 212.9,
+        "directional_integral_ml": 212.36499999999998,
+        "directional_integral_after_close_ml": 59.30000000000018
+      },
+      {
+        "cycle": 1,
+        "phase": "EXPIRATION",
+        "peak_slm": -30.4,
+        "displayed_volume_max_ml": 212.9,
+        "displayed_volume_end_ml": 0.0,
+        "directional_integral_ml": -220.9300000000001,
+        "directional_integral_after_close_ml": -12.149999999999887
+      },
+      {
+        "cycle": 2,
+        "phase": "INSPIRATION",
+        "peak_slm": 18.5,
+        "displayed_volume_max_ml": 168.9,
+        "displayed_volume_end_ml": 168.9,
+        "directional_integral_ml": 167.9650000000001,
+        "directional_integral_after_close_ml": 15.884999999999765
+      },
+      {
+        "cycle": 2,
+        "phase": "EXPIRATION",
+        "peak_slm": -40.3,
+        "displayed_volume_max_ml": 168.9,
+        "displayed_volume_end_ml": 0.0,
+        "directional_integral_ml": -204.10333333333338,
+        "directional_integral_after_close_ml": -34.80500000000125
+      },
+      {
+        "cycle": 3,
+        "phase": "INSPIRATION",
+        "peak_slm": 18.83,
+        "displayed_volume_max_ml": 165.0,
+        "displayed_volume_end_ml": 165.0,
+        "directional_integral_ml": 163.64166666666685,
+        "directional_integral_after_close_ml": 12.991666666666466
+      },
+      {
+        "cycle": 3,
+        "phase": "EXPIRATION",
+        "peak_slm": -44.23,
+        "displayed_volume_max_ml": 165.0,
+        "displayed_volume_end_ml": 0.0,
+        "directional_integral_ml": -209.4133333333332,
+        "directional_integral_after_close_ml": -39.81500000000037
+      },
+      {
+        "cycle": 4,
+        "phase": "INSPIRATION",
+        "peak_slm": 18.4,
+        "displayed_volume_max_ml": 163.6,
+        "displayed_volume_end_ml": 163.6,
+        "directional_integral_ml": 164.71833333333313,
+        "directional_integral_after_close_ml": 15.058333333332705
+      },
+      {
+        "cycle": 4,
+        "phase": "EXPIRATION",
+        "peak_slm": -44.77,
+        "displayed_volume_max_ml": 163.6,
+        "displayed_volume_end_ml": 0.0,
+        "directional_integral_ml": -204.5666666666674,
+        "directional_integral_after_close_ml": -41.53166666666703
+      },
+      {
+        "cycle": 5,
+        "phase": "INSPIRATION",
+        "peak_slm": 17.6,
+        "displayed_volume_max_ml": 161.8,
+        "displayed_volume_end_ml": 161.8,
+        "directional_integral_ml": 160.6516666666664,
+        "directional_integral_after_close_ml": 9.511666666666196
+      },
+      {
+        "cycle": 5,
+        "phase": "EXPIRATION",
+        "peak_slm": -46.23,
+        "displayed_volume_max_ml": 161.8,
+        "displayed_volume_end_ml": 0.0,
+        "directional_integral_ml": -199.6266666666666,
+        "directional_integral_after_close_ml": -45.99666666666437
+      }
+    ]
+  },
+  {
+    "file": "single_lung_hardware_run_356755311.csv",
+    "configuration": {
+      "control_hz": 100.0,
+      "respiratory_rate_bpm": 10.0,
+      "ie_inspiration": 1.0,
+      "ie_expiration": 2.0,
+      "target_volume_ml": 250.0,
+      "target_fill_time_s": 2.0,
+      "target_expiration_flow_slm": null,
+      "dead_time_s": 0.08,
+      "dead_time_within_cycle": false,
+      "volume_deadline_guard": false,
+      "volume_feedback_source": "oracle",
+      "precondition_s": 8.0,
+      "cycles": 5,
+      "end_volume_ml": 5.0,
+      "max_lung_volume_ml": 250.0,
+      "max_abs_flow_slm": 220.0,
+      "random_seed": 7,
+      "lung": {
+        "capacity_ml": 250.0,
+        "tau_in_s": 2.53,
+        "full_open_fill_time_s": 1.3,
+        "tau_out_s": 1.31,
+        "valve_exponent": 1.15,
+        "transport_delay_s": 0.025,
+        "sensor_tau_s": 0.02,
+        "sensor_noise_slm": 0.1,
+        "sensor_bias_slm": 0.0,
+        "flow_sign": 1,
+        "hardware_model_volume_ml": 1500.0,
+        "hardware_gamma_in": 0.96,
+        "hardware_gamma_out": 1.69,
+        "hardware_dead_zone_in_v": 3.73,
+        "hardware_dead_zone_out_v": 3.98,
+        "hardware_closure_v": 4.2
+      },
+      "pi": {
+        "kp": 0.01,
+        "ki": 0.06,
+        "kd": 0.0,
+        "integral_limit": 0.5,
+        "use_feedforward": true
+      },
+      "smith": {
+        "enabled": false,
+        "delay_s": 0.0,
+        "correction_gain": 0.6
+      },
+      "input_delay": {
+        "enabled": false,
+        "delay_s": 0.0
+      }
+    },
+    "cycles": [
+      {
+        "cycle": 1,
+        "phase": "INSPIRATION",
+        "peak_slm": 35.97,
+        "displayed_volume_max_ml": 250.0,
+        "displayed_volume_end_ml": 250.0,
+        "directional_integral_ml": 297.41333333333347,
+        "directional_integral_after_close_ml": 46.10000000000011
+      },
+      {
+        "cycle": 1,
+        "phase": "EXPIRATION",
+        "peak_slm": -41.17,
+        "displayed_volume_max_ml": 250.0,
+        "displayed_volume_end_ml": 0.0,
+        "directional_integral_ml": -257.25333333333344,
+        "directional_integral_after_close_ml": -15.201666666666652
+      },
+      {
+        "cycle": 2,
+        "phase": "INSPIRATION",
+        "peak_slm": 19.23,
+        "displayed_volume_max_ml": 250.0,
+        "displayed_volume_end_ml": 250.0,
+        "directional_integral_ml": 269.7549999999998,
+        "directional_integral_after_close_ml": 18.79166666666647
+      },
+      {
+        "cycle": 2,
+        "phase": "EXPIRATION",
+        "peak_slm": -38.87,
+        "displayed_volume_max_ml": 250.0,
+        "displayed_volume_end_ml": 0.0,
+        "directional_integral_ml": -277.85,
+        "directional_integral_after_close_ml": -36.56833333333255
+      },
+      {
+        "cycle": 3,
+        "phase": "INSPIRATION",
+        "peak_slm": 19.97,
+        "displayed_volume_max_ml": 250.0,
+        "displayed_volume_end_ml": 250.0,
+        "directional_integral_ml": 266.88000000000005,
+        "directional_integral_after_close_ml": 17.14166666666671
+      },
+      {
+        "cycle": 3,
+        "phase": "EXPIRATION",
+        "peak_slm": -39.13,
+        "displayed_volume_max_ml": 250.0,
+        "displayed_volume_end_ml": 0.0,
+        "directional_integral_ml": -283.866666666667,
+        "directional_integral_after_close_ml": -37.05500000000131
+      },
+      {
+        "cycle": 4,
+        "phase": "INSPIRATION",
+        "peak_slm": 19.73,
+        "displayed_volume_max_ml": 250.0,
+        "displayed_volume_end_ml": 250.0,
+        "directional_integral_ml": 263.3266666666667,
+        "directional_integral_after_close_ml": 13.158333333333154
+      },
+      {
+        "cycle": 4,
+        "phase": "EXPIRATION",
+        "peak_slm": -39.8,
+        "displayed_volume_max_ml": 250.0,
+        "displayed_volume_end_ml": 0.0,
+        "directional_integral_ml": -282.2500000000007,
+        "directional_integral_after_close_ml": -42.77000000000138
+      },
+      {
+        "cycle": 5,
+        "phase": "INSPIRATION",
+        "peak_slm": 18.43,
+        "displayed_volume_max_ml": 250.0,
+        "displayed_volume_end_ml": 250.0,
+        "directional_integral_ml": 262.655,
+        "directional_integral_after_close_ml": 12.963333333332919
+      },
+      {
+        "cycle": 5,
+        "phase": "EXPIRATION",
+        "peak_slm": -42.03,
+        "displayed_volume_max_ml": 250.0,
+        "displayed_volume_end_ml": 0.0,
+        "directional_integral_ml": -289.3033333333339,
+        "directional_integral_after_close_ml": -43.48500000000023
+      }
+    ]
+  }
+]

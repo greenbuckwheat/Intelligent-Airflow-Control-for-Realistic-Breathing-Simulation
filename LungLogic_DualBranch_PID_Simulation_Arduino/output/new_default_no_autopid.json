@@ -1,0 +1,63 @@
+{
+  "protocol_version": 8,
+  "model_reference": "2026-10-09 sponge sweep; calibrated flow; source setting 40 kPa; no-delay fit; user-selected stop-flow point 4.3 V",
+  "auto_pid_stage": null,
+  "configuration": {
+    "control_hz": 100.0,
+    "respiratory_rate_bpm": 6.0,
+    "ie_inspiration": 1.0,
+    "ie_expiration": 2.0,
+    "target_volume_ml": 250.0,
+    "target_fill_time_s": 3.333,
+    "target_expiration_flow_slm": null,
+    "dead_time_s": 0.0,
+    "dead_time_within_cycle": false,
+    "volume_deadline_guard": false,
+    "volume_feedback_source": "oracle",
+    "precondition_s": 3.0,
+    "cycles": 1,
+    "end_volume_ml": 5.0,
+    "max_lung_volume_ml": 250.0,
+    "max_abs_flow_slm": 220.0,
+    "random_seed": 7,
+    "lung": {
+      "capacity_ml": 250.0,
+      "tau_in_s": 2.694,
+      "full_open_fill_time_s": 1.3,
+      "tau_out_s": 1.697,
+      "valve_exponent": 1.15,
+      "transport_delay_s": 0.025,
+      "sensor_tau_s": 0.02,
+      "sensor_noise_slm": 0.1,
+      "sensor_bias_slm": 0.0,
+      "flow_sign": 1,
+      "hardware_flow_offset_slm": 0.0034,
+      "hardware_flow_gain": 1.0471,
+      "hardware_vac_leak_slm": 0.931,
+      "hardware_model_volume_ml": 2039.7,
+      "hardware_gamma_in": 0.7828,
+      "hardware_gamma_out": 0.9143,
+      "hardware_dead_zone_in_v": 3.7768,
+      "hardware_dead_zone_out_v": 4.0249,
+      "hardware_closure_v": 4.3
+    },
+    "pi": {
+      "kp": 0.01,
+      "ki": 0.06,
+      "kd": 0.0,
+      "integral_limit": 0.5,
+      "use_feedforward": true
+    },
+    "smith": {
+      "enabled": true,
+      "delay_s": 0.0,
+      "correction_gain": 0.6,
+      "ppv_open_time_s": 2.436,
+      "ppv_close_time_s": 2.436
+    },
+    "input_delay": {
+      "enabled": false,
+      "delay_s": 0.0
+    }
+  }
+}

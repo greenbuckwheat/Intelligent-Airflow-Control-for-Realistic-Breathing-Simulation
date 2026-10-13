@@ -1,0 +1,56 @@
+{
+  "data_scope": {
+    "csv_files": 40,
+    "accepted_dynamic_trials": 38,
+    "excluded_files": {
+      "37.csv": "filename/telemetry mismatch; user requested exclusion",
+      "42.csv": "confirmed zero-flow closure point, not a finite-dynamics trial"
+    }
+  },
+  "first_order_model": "V(t)=V_inf*(1-exp(-max(t-t_d,0)/tau_eff))",
+  "naive_global_a_equals_1_minus_U_over_5": {
+    "tau_at_opening_1_s": 1.2341883769768722,
+    "gamma": 0.7652229896213297,
+    "r_squared_tau": 0.5134876822467305,
+    "r_squared_log_tau": 0.6184255662781035
+  },
+  "naive_local_3p4_to_4p1V": {
+    "tau_at_opening_1_s": 0.14627904936275105,
+    "gamma": 2.30316662671284,
+    "r_squared_tau": 0.8926459470810406,
+    "r_squared_log_tau": 0.9347692568063978
+  },
+  "piecewise_fitted_dead_zone": {
+    "tau0_s": 1.8820850051229794,
+    "dead_zone_end_v": 3.0880542272949465,
+    "closure_v": 4.2,
+    "gamma": 0.6525248173997218,
+    "r_squared_tau": 0.9857848629634877,
+    "r_squared_log_tau": 0.9771316262305201
+  },
+  "piecewise_fixed_3p2V_dead_zone": {
+    "tau_at_opening_1_s": 2.0562062197462057,
+    "gamma": 0.6373513467694668,
+    "r_squared_tau": 0.9792409881748398,
+    "r_squared_log_tau": 0.964333148172726
+  },
+  "repeat_selection_sensitivity_not_formal_CI": {
+    "method": "2000 fits after randomly selecting one recorded trial per voltage",
+    "tau0_s": {
+      "median": 1.8730920246152722,
+      "p05": 1.7932596195110768,
+      "p95": 1.9418237685845707
+    },
+    "dead_zone_end_v": {
+      "median": 3.09157248277674,
+      "p05": 2.856486372966932,
+      "p95": 3.1713920864418927
+    },
+    "gamma": {
+      "median": 0.6450606991626127,
+      "p05": 0.6027489692992261,
+      "p95": 0.6797232750862122
+    }
+  },
+  "interpretation": "Use the piecewise gamma for the measured valve.  The local naive gamma is only an empirical slope and is inconsistent with the measured full-open tau when extrapolated."
+}

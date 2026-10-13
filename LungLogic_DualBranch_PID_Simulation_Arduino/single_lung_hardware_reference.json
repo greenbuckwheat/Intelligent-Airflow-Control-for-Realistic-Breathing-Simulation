@@ -1,0 +1,45 @@
+{
+  "respiratory_rate_bpm": 6.0,
+  "ie_inspiration": 1.0,
+  "ie_expiration": 2.0,
+  "target_volume_ml": 250.0,
+  "target_fill_time_s": 3.333,
+  "target_expiration_flow_slm": null,
+  "dead_time_s": 0.0,
+  "precondition_s": 2.0,
+  "cycles": 1,
+  "max_lung_volume_ml": 250.0,
+  "max_abs_flow_slm": 220.0,
+  "lung": {
+    "capacity_ml": 250.0,
+    "tau_in_s": 0.743,
+    "tau_out_s": 0.2678,
+    "flow_sign": 1,
+    "hardware_model_volume_ml": 323.9,
+    "hardware_gamma_in": 1.496,
+    "hardware_gamma_out": 2.0621,
+    "hardware_dead_zone_in_v": 4.0986,
+    "hardware_dead_zone_out_v": 4.1779,
+    "hardware_closure_v": 4.35,
+    "hardware_flow_offset_slm": 0.0034,
+    "hardware_flow_gain": 1.0471,
+    "hardware_vac_leak_slm": 0.814
+  },
+  "pi": {
+    "kp": 0.01,
+    "ki": 0.06,
+    "kd": 0.0,
+    "integral_limit": 4.0
+  },
+  "smith": {
+    "enabled": true,
+    "delay_s": 0.0,
+    "correction_gain": 0.6,
+    "ppv_open_time_s": 2.436,
+    "ppv_close_time_s": 2.436
+  },
+  "input_delay": {
+    "enabled": false,
+    "delay_s": 0.0
+  }
+}

@@ -1,0 +1,662 @@
+% !TeX program = xelatex
+\documentclass[UTF8,11pt,a4paper]{ctexart}
+
+\usepackage[
+  a4paper,
+  top=1.5cm,
+  bottom=2.0cm,
+  left=1.5cm,
+  right=1.5cm
+]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{tikz}
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+\definecolor{titleblue}{RGB}{25,65,115}
+\definecolor{lightblue}{RGB}{232,241,250}
+\definecolor{lightgray}{RGB}{245,245,245}
+
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.35em}
+\renewcommand{\arraystretch}{1.18}
+\setlist[itemize]{leftmargin=2em,itemsep=0.25em,topsep=0.25em}
+\setlist[enumerate]{leftmargin=2.2em,itemsep=0.25em,topsep=0.25em}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{lightgray},
+  frame=single,
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false
+}
+
+\newcommand{\reportimage}[2]{%
+  \IfFileExists{#2}{%
+    \includegraphics[width=#1]{#2}%
+  }{%
+    \fbox{%
+      \begin{minipage}[c][5.2cm][c]{#1}
+        \centering
+        缺少图片文件：\texttt{#2}
+      \end{minipage}%
+    }%
+  }%
+}
+
+\title{\bfseries\color{titleblue}控制软件阶段报告}
+\author{Yuqiao Li 及项目组}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+本文档记录 LungLogic 原型当前控制层的实现。报告重点说明呼吸频率、潮气量、吸呼比、目标流量和左右肺不对称等用户设置如何转化为软件状态、参考流量、阀门命令和实时监测数据。机械结构分析仅作为模型参数选择的背景。当前软件先采用一阶灰箱模型作为数字孪生和前馈控制基础；如果后续台架数据出现明显过冲、振荡、延迟或惯性效应，可再升级为二阶模型或带显式延迟的模型。
+\end{abstract}
+
+\vspace{1em}
+\tableofcontents
+\newpage
+
+\section{阶段目标与控制边界}
+
+本阶段目标是建立一套可运行、可调参、可记录日志的双支路肺模型控制软件框架。该软件同时服务于 simulation 阶段设计和后续硬件闭环测试。
+
+当前系统边界如下：
+\begin{itemize}
+  \item 不使用正压源。吸气阶段肺模型接通大气，依靠材料回弹被动膨胀；呼气阶段使用受调压的真空源主动收缩肺模型。
+  \item 左、右肺支路独立控制。每侧包含一个大气方向阀、一个真空方向阀、一个 PPV40V 比例夹管阀和一个 SFM3300 双向流量传感器。
+  \item 控制层使用 100 Hz 控制周期，执行呼吸状态机、流量 PID 控制、体积估计、阀门互锁、故障处理和遥测输出。
+  \item Python 上位机负责配置、仿真调参、可视化、串口通信、数据记录和实验后绘图。
+\end{itemize}
+
+因此，当前成果应理解为控制与软件原型，而不是最终硬件验证结论。稳定性、漏气、压力范围和长期重复性仍需台架实验确认。
+
+\section{用户需求到控制参数的映射}
+
+项目需求包括可调呼吸频率、潮气量、I:E 吸呼比、吸呼气流量，以及可控的左右肺通气不平衡。软件将这些需求映射为表~\ref{tab:param-map} 所示变量。
+
+\begin{table}[H]
+\centering
+\caption{用户设置到控制变量的映射}
+\label{tab:param-map}
+\small
+\begin{tabularx}{\textwidth}{
+  >{\raggedright\arraybackslash}p{3.5cm}
+  >{\raggedright\arraybackslash}p{4.6cm}
+  X
+}
+\toprule
+\textbf{用户设置} & \textbf{软件变量} & \textbf{控制含义} \\
+\midrule
+呼吸频率 & \texttt{respiratory\_rate\_bpm} & 定义周期 $T_c=60/RR$。标称值 15 bpm，对应 4 s/周期。 \\
+I:E 吸呼比 & \texttt{ie\_inspiration}, \texttt{ie\_expiration} & 将周期分为吸气和呼气时间：$T_{in}=T_c I/(I+E)$，$T_{out}=T_c E/(I+E)$。标称为 1:2。 \\
+潮气量 & \texttt{left\_target\_ml}, \texttt{right\_target\_ml} & 每个支路独立目标体积。默认每侧 250 mL，总量 500 mL。 \\
+目标充气时间 & \texttt{target\_fill\_time\_s} & 将体积目标转化为目标吸气流量。默认约 1.3 s。 \\
+通气不平衡 & 左右目标与模型参数 & 通过不同的左右体积目标、时间常数或流量方向设置模拟不平衡。 \\
+切换死区 & \texttt{dead\_time\_s} & 吸气与呼气切换之间所有方向阀关闭，避免大气与真空通路重叠。 \\
+预收缩时间 & \texttt{precondition\_s} & 正常循环前打开真空，使肺模型进入可重复初始状态。 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+表~\ref{tab:notation} 总结了本文后续公式和控制说明中使用的主要符号。
+
+\begin{table}[H]
+\centering
+\caption{本文使用的主要符号说明}
+\label{tab:notation}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabularx}{0.96\textwidth}{
+  >{\centering\arraybackslash}p{2.0cm}
+  >{\raggedright\arraybackslash}p{3.2cm}
+  X
+}
+\toprule
+\textbf{符号} & \textbf{含义} & \textbf{说明} \\
+\midrule
+$RR$ & 呼吸频率 & 单位为 bpm，用于计算完整呼吸周期。 \\
+$T_c$ & 呼吸周期 & $T_c=60/RR$，单位为 s。 \\
+$I,E$ & I:E 吸呼比项 & 分别表示吸气和呼气比例项，用于分配周期时间。 \\
+$T_{in}$ & 吸气时间 & $T_{in}=T_c I/(I+E)$。 \\
+$T_{out}$ & 呼气时间 & $T_{out}=T_c E/(I+E)$。 \\
+$T_{\mathrm{fill}}$ & 目标充气时间 & 用于把潮气量目标换算成吸气参考流量。 \\
+$i$ & 支路编号 & 表示左肺或右肺支路。 \\
+$V_i$ & 第 $i$ 支路估计体积 & 由流量积分得到，单位为 mL。 \\
+$V^*_{T,i}$ & 第 $i$ 支路目标潮气量 & 吸气阶段的体积终止目标，单位为 mL。 \\
+$V_{\max,i}$ & 第 $i$ 支路最大模型体积 & 一阶肺模型的容量上限，单位为 mL。 \\
+$V_{\mathrm{end}}$ & 呼气末体积阈值 & 呼气阶段停止真空收缩的体积阈值。 \\
+$Q_i$ & 第 $i$ 支路测量流量 & SFM3300 测得的流量，单位为 SLM；吸气为正，呼气为负。 \\
+$Q^*_i$ & 第 $i$ 支路参考流量 & PID 控制器希望跟踪的目标流量幅值。 \\
+$Q^*_{in,i}$ & 第 $i$ 支路吸气参考流量 & 由 $Q^*_{in,i}=0.06V^*_{T,i}/T_{\mathrm{fill}}$ 得到。 \\
+$Q_{\max,i}$ & 全开状态可用最大流量 & 由当前体积、容量和时间常数估计，用于模型前馈。 \\
+$\dot V_i$ & 体积变化率 & 与流量关系为 $Q_i=0.06\dot V_i$。 \\
+$\Delta t$ & 控制步长 & 当前控制频率 100 Hz 时，$\Delta t=0.01$ s。 \\
+$a_i$ & PPV40V 归一化开度 & $a_i=0$ 为关闭，$a_i=1$ 为全开。 \\
+$a_{ff,i}$ & 模型前馈开度 & 由一阶模型估计出的基础 PPV40V 开度。 \\
+$U_i$ & PPV40V 命令电压 & $U_i=5(1-a_i)$，当前约定 0 V 全开、5 V 全闭。 \\
+$\gamma$ & 阀门指数 & 描述 PPV40V 开度与有效流量之间的非线性。 \\
+$\tau_{in,i}$ & 吸气时间常数 & 表示第 $i$ 支路接通大气后的回弹膨胀速度。 \\
+$\tau_{out,i}$ & 呼气时间常数 & 表示第 $i$ 支路接通真空后的收缩速度。 \\
+$e_i$ & 流量误差 & $e_i=Q^*_i-|Q_i|$，用于 PID 控制。 \\
+$d_i$ & 微分项输入 & $d_i=-d|Q_i|/dt$，用于减少流量变化过快。 \\
+$K_p,K_i,K_d$ & PID 增益 & 分别为比例、积分和微分增益。 \\
+$L$ & 显式延迟 & 二阶或延迟模型中的总延迟项。 \\
+$\omega_n,\zeta$ & 二阶模型参数 & 分别表示自然频率和阻尼比，仅在升级二阶模型时使用。 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{控制逻辑与数学表达}
+
+本节将控制逻辑按从用户设置到阀门命令的顺序重新展开：先由呼吸频率和 I:E 比得到呼吸时序，再由潮气量目标得到参考流量，然后使用一阶肺支路模型估计前馈开度，最后由 PID 根据实时流量反馈进行修正，并通过体积终止逻辑实现左右独立控制。
+
+\subsection{由用户设置生成呼吸时序}
+
+呼吸频率决定完整呼吸周期：
+\begin{equation}
+  T_c=\frac{60}{RR}.
+\end{equation}
+
+I:E 比将周期分配为吸气时间和呼气时间：
+\begin{equation}
+  T_{in}=T_c\frac{I}{I+E},
+  \qquad
+  T_{out}=T_c\frac{E}{I+E}.
+\end{equation}
+
+默认设置为 15 bpm 和 I:E = 1:2，因此完整周期为 4 s，吸气约 1.33 s，呼气约 2.67 s。
+
+\subsection{参考流量生成}
+
+参考吸气流量由目标潮气量和目标充气时间得到：
+\begin{equation}
+  Q^*_{in,i}=0.06\frac{V^*_{T,i}}{T_{\mathrm{fill}}}.
+\end{equation}
+
+其中 0.06 用于将 mL/s 转换为 SLM。默认 $V^*_{T,i}=250$ mL，$T_{\mathrm{fill}}=1.3$ s，因此单侧目标吸气流量约为：
+\begin{equation}
+  Q^*_{in}=0.06\times\frac{250}{1.3}\approx11.54~\mathrm{SLM}.
+\end{equation}
+
+呼气阶段由于真空收缩使传感器流量符号为负，控制器跟踪的是流量幅值。吸气和呼气阶段统一采用：
+\begin{equation}
+  e_i=Q^*_i-|Q_i|.
+\end{equation}
+
+\subsection{一阶肺支路模型}
+
+每个肺支路被建模为一阶可变容积系统：
+\begin{equation}
+\dot V_i =
+\begin{cases}
+a_i^\gamma (V_{\max,i}-V_i)/\tau_{in,i}, & \text{吸气阶段},\\
+-a_i^\gamma V_i/\tau_{out,i}, & \text{呼气阶段},\\
+0, & \text{隔离阶段}.
+\end{cases}
+\end{equation}
+
+流量与体积积分关系为：
+\begin{equation}
+  Q_i=0.06\dot V_i,
+  \qquad
+  V_i[k]=V_i[k-1]+\frac{1000}{60}Q_i[k]\Delta t.
+\end{equation}
+
+其中 $V_i$ 为支路估计体积，$V_{\max,i}$ 为模型最大体积，$\tau_{in,i}$ 描述接通大气后的材料回弹速度，$\tau_{out,i}$ 描述接通真空后的收缩速度。$a_i$ 为 PPV40V 归一化开度，$\gamma$ 表示开度与有效流量之间的非线性。
+
+\subsection{模型前馈}
+
+一阶模型用于在反馈修正之前估计基础阀门开度：
+\begin{equation}
+  a_{ff,i} =
+  \left(
+    \frac{Q^*_i}{Q_{\max,i}}
+  \right)^{1/\gamma}.
+\end{equation}
+
+吸气阶段，全开可用流量估计为：
+\begin{equation}
+  Q_{\max,i}=0.06\frac{V_{\max,i}-V_i}{\tau_{in,i}}.
+\end{equation}
+
+呼气阶段，全开可用流量估计为：
+\begin{equation}
+  Q_{\max,i}=0.06\frac{V_i}{\tau_{out,i}}.
+\end{equation}
+
+\subsection{PID 反馈修正}
+
+PID 控制器根据测量流量反馈修正前馈开度：
+\begin{equation}
+  a_i =
+  \mathrm{sat}_{[0,1]}
+  \left[
+    a_{ff,i}
+    +K_p e_i
+    +K_i\int e_i dt
+    +K_d d_i
+  \right].
+\end{equation}
+
+D 项采用测量值导数：
+\begin{equation}
+  d_i=-\frac{d|Q_i|}{dt}.
+\end{equation}
+
+这样可以避免直接对参考流量阶跃求导，从而减少状态切换时的 derivative kick。默认 $K_d=0$，因此控制行为与原 PI 实现一致；后续硬件调试时可逐步增大 D 项以增加阻尼。
+
+当前默认控制参数为：
+\begin{itemize}
+  \item $K_p=0.022~\mathrm{opening/SLM}$；
+  \item $K_i=0.16~\mathrm{opening/(SLM\cdot s)}$；
+  \item $K_d=0.0~\mathrm{opening\cdot s/SLM}$；
+  \item 积分限幅为 2.0；
+  \item 使用条件积分抑制积分饱和。
+\end{itemize}
+
+\subsection{阀门命令转换}
+
+PID 输出的是 PPV40V 开度，而硬件接收的是电压命令。simulation 与 STM32 固件采用相同转换：
+\begin{equation}
+  U_i=5(1-a_i).
+\end{equation}
+
+按当前项目约定，$a_i=1$ 对应 0 V 和 PPV40V 全开，$a_i=0$ 对应 5 V 和 PPV40V 全闭。硬件中 STM32 通过 3.3 V PWM 输出、外部低通和电平转换生成 0--5 V 命令电压。
+
+\subsection{体积终止与左右独立控制}
+
+流量控制负责调节每个支路体积变化速度，但支路是否停止由估计体积决定。吸气阶段，若某侧满足：
+\begin{equation}
+  V_i \geq V^*_{T,i},
+\end{equation}
+则该侧两个方向阀关闭，PPV40V 保留上一条命令开度，等待下一阶段从该开度继续调节。另一侧若尚未达到目标，可继续吸气；停止或故障时 PPV40V 关闭。
+
+呼气阶段，若某侧满足：
+\begin{equation}
+  V_i \leq V_{\mathrm{end}},
+\end{equation}
+则该侧停止真空收缩。默认 $V_{\mathrm{end}}=5$ mL。
+
+左右支路独立判断，因此软件可通过不同左右潮气量目标、不同 $\tau_{in}$ 或 $\tau_{out}$、不同 PPV40V 映射、不同传感器方向或零点偏置来模拟 ventilation imbalance。
+
+\subsection{模型参数与校准状态}
+
+初始模型参数主要来自机械组肺模型与管路报告。该报告将肺体回弹近似为：
+\begin{equation}
+  V(t)=V_{\max}(1-e^{-t/\tau}).
+\end{equation}
+
+报告给出的最大位移体积约为 558 mL。对于 10 mm 内径管路，恢复时间约为 $4\tau=2.27$ s，因此：
+\begin{equation}
+  \tau_{in}\approx 2.27/4 \approx 0.57~\mathrm{s}.
+\end{equation}
+
+当前初始参数为：
+\begin{itemize}
+  \item 左、右支路 $V_{\max}=558$ mL；
+  \item 左支路 $\tau_{in}=0.57$ s，右支路 $\tau_{in}=0.60$ s；
+  \item 左、右 $\tau_{out}=0.50/0.54$ s；
+  \item 阀门指数 $\gamma=1.15$；
+  \item 传输延迟 25 ms；
+  \item 传感器时间常数 20 ms；
+  \item 流量噪声 0.10 SLM。
+\end{itemize}
+
+这些值是 simulation 阶段初始假设，而不是最终硬件校准结果。硬件阶段应通过 PPV40V 电压--流量实验更新 $\gamma$ 或改用查表映射，通过阀门阶跃实验估计传输延迟，通过 SFM3300 阶跃响应估计传感器动态，并通过零流量/稳定流量记录估计传感器噪声。
+
+\subsection{升级为二阶模型的条件}
+
+一阶模型的优点是参数少、易辨识，并可直接用于前馈估计。如果硬件实验出现明显欠阻尼振荡、一阶模型无法拟合的上升沿、PPV40V 机械滞后或左右支路强耦合，则应考虑升级为二阶模型或带显式延迟模型。
+
+一种可能的二阶形式为：
+\begin{equation}
+  G(s)=\frac{\omega_n^2}{s^2+2\zeta\omega_n s+\omega_n^2}e^{-Ls},
+\end{equation}
+其中 $\omega_n$ 为自然频率，$\zeta$ 为阻尼比，$L$ 为显式延迟。
+
+\section{控制状态机}
+
+控制逻辑由有限状态机实现。状态机决定大气阀、真空阀和 PPV40V 的动作，并保证同一支路大气阀与真空阀不会同时打开。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  state/.style={draw, rounded corners, align=center, minimum width=2.7cm, minimum height=1.0cm, fill=lightblue},
+  arrow/.style={-Latex, thick}
+]
+\node[state] (pre) {PRECONDITION\\预收缩};
+\node[state, right=of pre] (dti) {DEAD\_TO\_INSP\\死区};
+\node[state, right=of dti] (insp) {INSPIRATION\\吸气};
+\node[state, below=of insp] (dte) {DEAD\_TO\_EXP\\死区};
+\node[state, left=of dte] (exp) {EXPIRATION\\呼气};
+\node[state, left=of exp] (done) {COMPLETE/FAULT\\结束/故障};
+\draw[arrow] (pre) -- (dti);
+\draw[arrow] (dti) -- (insp);
+\draw[arrow] (insp) -- (dte);
+\draw[arrow] (dte) -- (exp);
+\draw[arrow] (exp) -- (done);
+\draw[arrow] (exp.north) .. controls +(0,1.1) and +(0,-1.1) .. (dti.south);
+\end{tikzpicture}
+\caption{呼吸控制状态机}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{状态机中的阀门动作和控制目标}
+\label{tab:state-machine}
+\small
+\begin{tabularx}{\textwidth}{
+  >{\raggedright\arraybackslash}p{3.1cm}
+  >{\centering\arraybackslash}p{2.3cm}
+  >{\centering\arraybackslash}p{2.3cm}
+  X
+}
+\toprule
+\textbf{State} & \textbf{大气阀} & \textbf{真空阀} & \textbf{控制目标} \\
+\midrule
+PRECONDITION & 关闭 & 打开 & 将肺模型收缩到可重复初始状态。 \\
+DEAD\_TO\_INSP & 关闭 & 关闭 & 方向切换死区。 \\
+INSPIRATION & 打开 & 关闭 & 调节正向流量，直到达到目标潮气量。 \\
+DEAD\_TO\_EXP & 关闭 & 关闭 & 真空收缩前的方向切换死区。 \\
+EXPIRATION & 关闭 & 打开 & 调节负向流量，直到达到呼气末体积。 \\
+COMPLETE/FAULT & 关闭 & 关闭 & 停止运行或进入安全状态。 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+在任意时刻，同一侧的大气阀和真空阀均不允许同时打开。当前仿真测试也检查该互锁条件。
+
+\section{控制软件实现}
+
+\subsection{Simulation 实现：\texttt{lung\_pid\_gui.py}}
+
+\texttt{lung\_pid\_gui.py} 是 simulation 阶段的主要界面。它不连接硬件，而是运行 \texttt{lung\_model.py} 中的一阶数字孪生模型，并将结果以动态气路图、曲线和独立实时监测窗口显示。
+
+GUI 当前支持表~\ref{tab:gui-parameters} 所列参数。
+
+\begin{table}[H]
+\centering
+\caption{Simulation GUI 参数及控制功能}
+\label{tab:gui-parameters}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabularx}{0.96\textwidth}{p{3.2cm} p{3.0cm} X}
+\toprule
+\textbf{参数} & \textbf{含义} & \textbf{实现的控制功能} \\
+\midrule
+Respiratory rate / bpm & 每分钟呼吸次数 & 设置周期 $T_c=60/RR$。 \\
+I:E inspiration & 吸气比例项 & 与 I:E expiration 一起决定吸气时间。 \\
+I:E expiration & 呼气比例项 & 决定呼气时间；标称 1:2 约对应 1.3 s 吸气、2.7 s 呼气。 \\
+Left target / mL & 左肺潮气量目标 & 左肺估计体积达到目标后停止吸气。 \\
+Right target / mL & 右肺潮气量目标 & 右肺估计体积达到目标后停止吸气；左右不同可模拟不对称。 \\
+Target fill time / s & 达到目标体积的时间 & 转化为参考流量 $Q^*=0.06V_T/T_{\mathrm{fill}}$。 \\
+Simulation cycles & 仿真呼吸周期数 & 控制生成多少个呼吸周期。 \\
+Playback speed & 播放速度倍率 & 只改变显示速度，不改变仿真结果。 \\
+\midrule
+$K_p$ & 比例增益 & 根据瞬时流量误差修正 PPV40V 开度。 \\
+$K_i$ & 积分增益 & 消除稳态流量误差，提高潮气量重复性。 \\
+$K_d$ & 微分增益 & 根据测量流量变化率增加阻尼；硬件调参前可保持 0。 \\
+Integral limit & 积分限幅 & 防止阀门全开或全闭时积分 windup。 \\
+Enable model feedforward & 启用模型前馈 & 先由一阶模型估计基础开度，再由 PID 修正。 \\
+\midrule
+Left $V_{\max}$ / mL & 左肺容量 & 左支路一阶模型的最大体积。 \\
+Right $V_{\max}$ / mL & 右肺容量 & 右支路一阶模型的最大体积。 \\
+Left $\tau_{\mathrm{in}}$ / s & 左吸气时间常数 & 左肺接通大气后的膨胀速度。 \\
+Right $\tau_{\mathrm{in}}$ / s & 右吸气时间常数 & 右肺接通大气后的膨胀速度。 \\
+Left $\tau_{\mathrm{out}}$ / s & 左呼气时间常数 & 左肺在真空下的收缩速度。 \\
+Right $\tau_{\mathrm{out}}$ / s & 右呼气时间常数 & 右肺在真空下的收缩速度。 \\
+Pinch valve exponent $\gamma$ & 阀门非线性 & 描述 PPV40V 开度与有效流量之间的非线性。 \\
+Transport delay / s & 气路延迟 & 表示阀门命令到测得流量响应之间的延迟。 \\
+Flow noise sigma / SLM & 传感器噪声 & 给仿真 SFM3300 流量信号加入噪声。 \\
+Direction-change dead time / s & 方向切换死区 & 避免吸呼切换时大气阀和真空阀重叠打开。 \\
+Precondition time / s & 初始真空收缩时间 & 正常循环前形成可重复的收缩初始状态。 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+需要强调，Simulation GUI 中的 ``live'' 指的是预先计算出的仿真数据按播放时间实时刷新，并不是来自 SFM3300 的硬件遥测。
+
+\begin{figure}[H]
+\centering
+\reportimage{0.7\textwidth}{sim1.png}
+\caption{当前 simulation GUI：包含参数面板、Dynamic Model 视图和 Live Curves 曲线页}
+\label{fig:simulation-gui}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\reportimage{0.7\textwidth}{sim2.png}
+\caption{Simulation 阶段实时监测窗口：显示状态、周期、测量/参考流量、体积、PPV 命令、方向阀状态和滚动流量曲线}
+\label{fig:simulation-live-monitor}
+\end{figure}
+
+此外，\texttt{lung\_pid\_simulation.py} 提供命令行仿真入口，可生成 \path{output/lung_simulation.csv} 和 \path{output/lung_simulation.png}。因此同一套模型既可用于 GUI 演示，也可用于批量仿真。
+
+\subsection{硬件监控与串口协议：\texttt{lung\_hardware\_monitor.py} 与 STM32 固件}
+
+\begin{figure}[H]
+\centering
+\reportimage{0.7\textwidth}{real1.png}
+\caption{\texttt{lung\_hardware\_monitor.py} 硬件控制界面，包含串口选择、参数配置和实时遥测显示}
+\label{fig:hardware-monitor}
+\end{figure}
+
+\texttt{lung\_hardware\_monitor.py} 是面向真实硬件的上位机程序。它向 NUCLEO-G474RE 发送同一组配置参数，启动真实控制循环，接收 SFM3300/控制器遥测，保存 CSV 日志，并生成结果图。它是 simulation 迁移到硬件测试的主要软件路径。
+
+串口流程如下：
+\begin{enumerate}
+  \item 上位机打开串口并发送 \texttt{HELLO}。
+  \item STM32 回复 \texttt{READY,LUNGLOGIC\_G474,2}。
+  \item 上位机发送 \texttt{CFG,2} 命令，包含呼吸参数、PID 参数、体积限制、模型参数和阀门指数。
+  \item STM32 确认后，上位机发送 \texttt{START}。
+  \item 运行期间上位机发送 \texttt{PING} 作为通信心跳，STM32 以 50 Hz 发送 \texttt{TEL} 遥测。
+  \item 上位机保存 CSV 数据，并绘制体积、流量和 PPV 开度曲线。
+\end{enumerate}
+
+遥测数据包含当前状态、周期序号、左右测量流量、左右估计体积、参考流量、PPV 开度、命令电压和方向阀掩码。
+
+当前 STM32 固件 \texttt{firmware/lung\_controller\_stm32/lung\_controller\_stm32.ino} 实现以下功能：
+\begin{itemize}
+  \item 100 Hz 控制循环；
+  \item TCA9548A/PCA9548A Pa.Hub 通道选择，用于两个 SFM3300；
+  \item D10/D9 的 3.3 V PWM 输出经外部低通和电平转换，形成两路 0--5 V PPV40V 命令；
+  \item D6 低电平有效 emergency stop 输入；
+  \item 四个互锁的电磁阀输出；
+  \item 与 Python 模型一致的状态机和 PID 结构；
+  \item 传感器读取失败、流量超限、体积超限、上位机超时和阀门互锁故障检测；
+  \item 故障安全动作：关闭所有方向阀，并将 PPV40V 命令置为约 5 V。
+\end{itemize}
+
+闭环固件采用 PCB profile 0 的 NUCLEO-G474RE 引脚分配，如表~\ref{tab:pin-map} 所示。
+
+\begin{table}[H]
+\centering
+\caption{当前硬件固件使用的 NUCLEO-G474RE 引脚映射}
+\label{tab:pin-map}
+\small
+\begin{tabular}{lll}
+\toprule
+\textbf{引脚} & \textbf{功能} & \textbf{类型} \\
+\midrule
+D2 & 右真空电磁阀 & 数字输出 \\
+D3 & 左真空电磁阀 & 数字输出 \\
+D4 & 右大气电磁阀 & 数字输出 \\
+D5 & 左大气电磁阀 & 数字输出 \\
+D6 & 急停输入 & 数字输入，低电平有效 \\
+D9 & 右 PPV40V 命令 & 3.3 V PWM，经外部低通/电平转换 \\
+D10 & 左 PPV40V 命令 & 3.3 V PWM，经外部低通/电平转换 \\
+A4/PC1 & 软件 I2C SDA & 开漏通信 \\
+A5/PC0 & 软件 I2C SCL & 开漏通信 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+24 V 电磁阀和 PPV40V 供电不能由 STM32 引脚直接驱动，必须使用合适的 MOSFET 级、续流保护、外部电源和共地连接。G474RE 的 3.3 V PWM 还需要经过已验证的 0--5 V 转换级。软件安全检查不能替代机械真空调压器或硬件急停。
+
+\section{硬件迁移与校准计划}
+
+从 simulation 迁移到硬件时，控制逻辑可以基本保持一致，但模型参数、传感器偏置、阀门映射和安全限值必须通过实验校准。当前代码库提供三个主要入口：
+\begin{itemize}
+  \item \texttt{config.example.json}：simulation 与硬件共用配置；
+  \item \texttt{lung\_hardware\_monitor.py}：向 STM32 发送配置并记录遥测；
+  \item \texttt{fit\_lung\_parameters.py}：从 CSV 数据拟合一阶时间常数。
+\end{itemize}
+
+\subsection{从仿真参数到硬件命令}
+
+硬件模式下，用户设置仍按同一逻辑转换：
+\begin{itemize}
+  \item 呼吸频率和 I:E 比转换为吸气、呼气和完整周期时间；
+  \item 左右潮气量目标转换为各支路体积终止条件；
+  \item 目标充气时间转换为目标吸气流量；
+  \item dead time 转换为吸气/呼气切换之间所有方向阀关闭的间隔；
+  \item PID 和模型参数转换为 PPV40V PWM 占空比，经 RC 滤波后形成 0--5 V 命令电压。
+\end{itemize}
+
+吸气/呼气切换间隙可通过 \texttt{dead\_time\_s} 手动设置。在 GUI 中显示为 \texttt{Direction-change dead time / s}，发送到 STM32 时转换为 \texttt{deadTimeMs}。
+
+\subsection{需要完成的校准}
+
+\paragraph{1. SFM3300 零流量偏置校准。}
+当所有方向阀关闭时，真实流量应为 0 SLM，但真实传感器可能仍有小偏置。如果偏置被积分进体积估计，体积会随时间漂移。建议在每个 dead-time 区间平均测得流量，并在体积积分前扣除：
+\begin{equation}
+  Q_{\mathrm{corrected},i}=Q_{\mathrm{measured},i}-Q_{\mathrm{offset},i}.
+\end{equation}
+
+\paragraph{2. 大气回弹时间常数 \texorpdfstring{$\tau_{in}$}{tau\_in}。}
+该参数描述 fake lung 被压缩或真空收缩后，接通大气时重新膨胀的速度。当前约 0.57 s 的数值来自机械组 10 mm 管路测试。最终硬件应重复该实验：PPV40V 全开，打开大气阀，记录 SFM3300 流量，积分得到体积，并拟合一阶模型。1.3 s 目标充气时间通常保持不变，除非后期肺体材料回弹明显变差。
+
+\paragraph{3. 真空收缩时间常数 \texorpdfstring{$\tau_{out}$}{tau\_out}。}
+该参数描述真空源收缩肺模型的速度。目前它仍为初始占位值，必须通过受控真空实验更新。
+
+\paragraph{4. PPV40V 电压--流量校准。}
+PPV40V 命令电压与实际流量并不完全线性。当前模型近似为：
+\begin{equation}
+  Q \propto a^\gamma,
+  \qquad
+  U=5(1-a).
+\end{equation}
+硬件阶跃实验应在吸气和呼气两个方向扫描 0--5 V 命令。如果指数模型足够，可更新 \texttt{valve\_exponent}；如果存在明显死区或强非线性，应改用查表或分段映射。
+
+\paragraph{5. 传感器延迟、噪声和方向校准。}
+需要确认两个 SFM3300 的符号方向、噪声水平和响应延迟。当前延迟和噪声值只是初始假设。
+
+\paragraph{6. 左右支路一致性校准。}
+左右支路应独立校准。最终系统应具有独立的左右 \texttt{tau\_in}、\texttt{tau\_out}、流量方向、零点偏置和 PPV 映射参数。
+
+\subsection{\texttt{lung\_hardware\_monitor.py} 的作用}
+
+\texttt{lung\_hardware\_monitor.py} 在硬件迁移中有三类作用。
+
+第一，它是配置工具。它读取 \texttt{config.example.json}，并向 STM32 发送完整 \texttt{CFG} 命令。
+
+第二，它是运行控制工具。它发送 \texttt{START}、\texttt{STOP} 和周期性 \texttt{PING}。
+
+第三，它是校准数据来源。它将 \texttt{TEL} 遥测记录为 CSV，包括测量流量、估计体积、参考流量、开度、命令电压、状态和阀门掩码。这些 CSV 可由 \texttt{fit\_lung\_parameters.py} 和后续周期分析工具使用。
+
+\subsection{未来校准界面}
+
+当前硬件校准流程主要依赖脚本和 CSV。后续 GUI 可加入：
+\begin{itemize}
+  \item 手动 dead-time 设置与测试；
+  \item PPV40V 全开恢复实验，以及自动计算到达 250 mL 所需时间；
+  \item SFM3300 零点偏置记录与保存；
+  \item PPV40V 0--5 V 阶跃扫描；
+  \item 自动拟合 $\tau_{in}$、$\tau_{out}$ 和 $\gamma$；
+  \item 自动生成每周期潮气量误差、I:E 误差、左右平衡误差和 $\pm3\%$ 稳定性统计。
+\end{itemize}
+
+\section{与 Scope 的符合情况}
+
+表~\ref{tab:scope} 总结当前控制层相对于项目 scope 的状态。
+
+\begin{table}[H]
+\centering
+\caption{当前控制层与项目 scope 的符合情况}
+\label{tab:scope}
+\small
+\begin{tabularx}{\textwidth}{
+  >{\raggedright\arraybackslash}p{4.7cm}
+  >{\centering\arraybackslash}p{2.5cm}
+  X
+}
+\toprule
+\textbf{需求} & \textbf{状态} & \textbf{说明} \\
+\midrule
+12--18 bpm，标称 15 bpm & 已实现 & GUI 和配置文件均支持。 \\
+500 mL 标称潮气量 & 仿真中已实现 & 默认每侧 250 mL；仍需硬件验证。 \\
+可调 I:E 比，标称 1:2 & 已实现 & RR 和 I:E 共同决定吸气/呼气时间。 \\
+左右肺独立控制 & 控制逻辑已实现 & 左右独立目标、PID、终止逻辑和阀门命令。 \\
+可控通气不平衡 & 软件已实现 & 通过左右目标和模型参数差异实现。 \\
+实时调整和可视化 & 上位机侧已实现 & GUI 支持参数设置、动态模型、曲线和 live monitor。 \\
+数据采集与分析 & 部分实现 & 已有 CSV 记录和绘图；异常指标自动分析仍需补充。 \\
+周期级重新校准 & 部分实现 & 已有预收缩和控制器重置；自动零流量偏置估计尚未完成。 \\
+$\pm3\%$ 稳定性 & 待验证 & 需要硬件重复周期统计。 \\
+压力范围和漏气证明 & 待验证 & 当前软件没有压力传感器输入，也没有漏气测试结果。 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{当前限制与下一步}
+
+当前软件已经能够表达完整的控制行为，但仍存在以下限制：
+\begin{itemize}
+  \item $\tau_{out}$、PPV40V 非线性和传感器动态仍是初始值；
+  \item 尚未加入每周期零流量偏置自动估计；
+  \item simulation GUI 不等同于真实硬件遥测；
+  \item 尚未实现自动 compliance report；
+  \item 没有压力传感器输入，因此软件本身不能证明压力安全。
+\end{itemize}
+
+建议下一阶段按以下顺序推进：
+\begin{enumerate}
+  \item 使用 SFM3300 数据重新辨识 $\tau_{in}$ 和 $\tau_{out}$；
+  \item 对 PPV40V 做 0--5 V 阶跃实验，拟合电压--流量映射；
+  \item 在 STM32 固件中加入 dead-time 零流量偏置估计；
+  \item 在 Python 中加入周期分析，输出 RR、I:E、潮气量误差、左右平衡和稳定性；
+  \item 将 GUI live monitor 连接到真实硬件遥测；
+  \item 若一阶模型不足，再升级为二阶或带延迟模型。
+\end{enumerate}
+
+\section{结论}
+
+当前 LungLogic 控制层已经建立了从用户需求到控制动作的完整软件路径。呼吸频率、潮气量和 I:E 比被转换为周期时间和参考流量；状态机在预收缩、死区、吸气和呼气之间安全切换；前馈加 PID 控制器将目标流量转换为 PPV40V 开度；基于体积的终止逻辑支持对称或非对称通气。
+
+上位机 GUI 支持参数调节、数字孪生可视化、仿真实时流量监测和曲线显示。硬件监控程序与 STM32 固件提供串口配置、遥测记录、PWM 形式的 PPV40V 命令输出、急停输入和基础故障保护。
+
+本阶段的主要价值在于完成控制逻辑和软件工作流。最终性能声明仍需来自 SFM3300 的硬件数据、更新后的模型参数，以及与项目 scope 直接对应的周期级分析。
+
+\begin{thebibliography}{9}
+
+\bibitem{orifice}
+机械设计组，\textit{System Dynamics and Volume Constraints / Orifice Report}，2026。
+
+\bibitem{electrical}
+电气设计组，\textit{LungLogic Week 4 Progress Report: Electrical Section}，2026。
+
+\bibitem{software}
+LungLogic 代码库：\texttt{lung\_model.py}、\texttt{lung\_pid\_gui.py}、\texttt{lung\_hardware\_monitor.py} 和 \path{firmware/lung_controller_stm32/lung_controller_stm32.ino}，2026。
+
+\bibitem{scope}
+LungLogic 项目 scope 文档，2026。
+
+\end{thebibliography}
+
+\end{document}

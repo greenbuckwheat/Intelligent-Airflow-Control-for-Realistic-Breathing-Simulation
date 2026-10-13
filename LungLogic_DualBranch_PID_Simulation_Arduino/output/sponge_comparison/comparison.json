@@ -1,0 +1,114 @@
+{
+  "new": [
+    {
+      "group": "sponge",
+      "file": "new.csv",
+      "direction": "VAC",
+      "duration_s": 5.460000000000036,
+      "volume_ml": 1639.0571666666374,
+      "amplitude_ml": 1639.3098146616592,
+      "tau_s": 1.1716512518370394,
+      "apparent_delay_s": 0.15044825790718747,
+      "tau_no_delay_s": 1.3393344942709988,
+      "tau_skip_first_0p1_s": 1.1552454161096062,
+      "cumulative_r2": 0.9971791901967108,
+      "tail_last_0p5_slm": 2.567,
+      "peak_slm": 58.167,
+      "t50_s": 1.0156415882149417,
+      "t90_s": 2.8083320993367957,
+      "t95_s": 3.828218266666724
+    },
+    {
+      "group": "sponge",
+      "file": "new.csv",
+      "direction": "ATM",
+      "duration_s": 10.159999999999968,
+      "volume_ml": 1623.9640000000404,
+      "amplitude_ml": 1613.132552666304,
+      "tau_s": 0.7823973342603451,
+      "apparent_delay_s": 0.7100265774299079,
+      "tau_no_delay_s": 1.2607680191588797,
+      "tau_skip_first_0p1_s": 0.7823973497179317,
+      "cumulative_r2": 0.9901838883126954,
+      "tail_last_0p5_slm": 0.167,
+      "peak_slm": 77.9,
+      "t50_s": 1.3222757946210004,
+      "t90_s": 2.4905720477626887,
+      "t95_s": 3.1272491992312355
+    }
+  ],
+  "before_full_open": {
+    "ATM": {
+      "n": 5,
+      "tau_s": {
+        "median": 1.8089475813377938,
+        "min": 1.6971413641456117,
+        "max": 2.2769712055908236
+      },
+      "t50_s": {
+        "median": 1.9566400303564624,
+        "min": 1.815475419941413,
+        "max": 2.086729425754333
+      },
+      "t90_s": {
+        "median": 3.9498863095238135,
+        "min": 3.8368489323488237,
+        "max": 4.556196030932598
+      },
+      "t95_s": {
+        "median": 5.069011330815422,
+        "min": 4.681144537242191,
+        "max": 5.874238690611424
+      },
+      "volume_ml": {
+        "median": 1357.1808333333336,
+        "min": 1229.1633333333307,
+        "max": 1452.55066666667
+      },
+      "tail_last_0p5_slm": {
+        "median": 0.567,
+        "min": 0.367,
+        "max": 0.867
+      }
+    },
+    "VAC": {
+      "n": 12,
+      "tau_s": {
+        "median": 1.3716171461297764,
+        "min": 1.1966652574756977,
+        "max": 2.0136651816149613
+      },
+      "t50_s": {
+        "median": 0.98542964034778,
+        "min": 0.9396432344940762,
+        "max": 1.140224227441283
+      },
+      "t90_s": {
+        "median": 2.329016104454423,
+        "min": 2.192854808869142,
+        "max": 3.2615384921029116
+      },
+      "t95_s": {
+        "median": 2.7284749254247176,
+        "min": 2.55992545510016,
+        "max": 4.684547757716971
+      },
+      "volume_ml": {
+        "median": 1703.896166666687,
+        "min": 1632.01766666666,
+        "max": 1907.1143333334005
+      },
+      "tail_last_0p5_slm": {
+        "median": 3.77475,
+        "min": 2.6,
+        "max": 7.2165
+      }
+    }
+  },
+  "notes": [
+    "Only one new cycle; pressures unrecorded; gamma unidentifiable at opening=1.",
+    "t90 is relative to recorded integral, not proven final lung volume.",
+    "Apparent fitted delay is curve shape, not measured PPV latency.",
+    "Old trials use existing screening; no leakage subtraction beyond initial baseline."
+  ]
+}

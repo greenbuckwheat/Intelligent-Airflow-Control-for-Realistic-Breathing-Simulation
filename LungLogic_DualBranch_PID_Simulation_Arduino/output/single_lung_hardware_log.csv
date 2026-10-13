@@ -1,0 +1,2 @@
+run_id,time_s,state,state_name,cycle,flow_slm,volume_ml,flow_reference_slm,opening,command_v,valve_mask
+7,1.25,3,INSPIRATION,1,10.5,180.0,11.5,0.72,1.4,1

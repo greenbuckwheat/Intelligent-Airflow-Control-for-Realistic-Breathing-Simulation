@@ -1,0 +1,38 @@
+{
+  "method": "baseline-corrected flow integration and robust first-order cumulative-volume fit",
+  "excluded": {
+    "37.csv": "telemetry stayed at 0 V",
+    "42.csv": "confirmed fully closed at 4.2 V"
+  },
+  "project_opening_a_equals_1_minus_v_over_5": {
+    "fit_voltage_range_v": [
+      3.4,
+      4.1
+    ],
+    "tau_based": {
+      "gamma": 2.30316662671284,
+      "coefficient": 0.14627904936275105,
+      "r_squared": 0.8926459470810406
+    },
+    "early_flow_based": {
+      "gamma": 2.8508993253018087,
+      "coefficient": 868.8430242624522,
+      "r_squared": 0.9123758584330535
+    },
+    "recommended_preliminary_gamma": 2.5770329760073243
+  },
+  "measured_active_range_opening": {
+    "definition": "a_eff=(4.2-V)/(4.2-3.2), clipped to 0..1",
+    "tau_based": {
+      "gamma": 0.6373513467694668,
+      "coefficient": 2.0562062197462057,
+      "r_squared": 0.9792409881748398
+    },
+    "early_flow_based": {
+      "gamma": 0.8132369600446471,
+      "coefficient": 34.29830948317928,
+      "r_squared": 0.8741208806176165
+    },
+    "recommended_preliminary_gamma": 0.7252941534070569
+  }
+}

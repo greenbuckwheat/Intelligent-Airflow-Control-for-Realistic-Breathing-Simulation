@@ -1,0 +1,279 @@
+{
+  "schema": "pwm_exp_v1",
+  "channel": "D5",
+  "board": "NUCLEO-G474RE",
+  "calibration_date": "2026-10-05T13:11:53.160251+11:00",
+  "pwm_frequency_hz": 1000,
+  "resolution_bits": 12,
+  "direction": "up",
+  "records": [
+    {
+      "pwm_code": 0,
+      "target_v": 0.0,
+      "kind": "sweep",
+      "direction": "up",
+      "measured_v": 0.0074,
+      "duty_percent": 0.0,
+      "error_v": 0.0074,
+      "timestamp": "2026-10-05T13:04:17.845901+11:00"
+    },
+    {
+      "pwm_code": 410,
+      "target_v": 0.5006105006105006,
+      "kind": "sweep",
+      "direction": "up",
+      "measured_v": 0.5017,
+      "duty_percent": 10.012210012210012,
+      "error_v": 0.0010894993894994265,
+      "timestamp": "2026-10-05T13:04:41.923839+11:00"
+    },
+    {
+      "pwm_code": 819,
+      "target_v": 1.0,
+      "kind": "sweep",
+      "direction": "up",
+      "measured_v": 0.998,
+      "duty_percent": 20.0,
+      "error_v": -0.0020000000000000018,
+      "timestamp": "2026-10-05T13:05:02.064007+11:00"
+    },
+    {
+      "pwm_code": 1228,
+      "target_v": 1.4993894993894994,
+      "kind": "sweep",
+      "direction": "up",
+      "measured_v": 1.495,
+      "duty_percent": 29.987789987789988,
+      "error_v": -0.004389499389499285,
+      "timestamp": "2026-10-05T13:05:24.822572+11:00"
+    },
+    {
+      "pwm_code": 1638,
+      "target_v": 2.0,
+      "kind": "sweep",
+      "direction": "up",
+      "measured_v": 1.993,
+      "duty_percent": 40.0,
+      "error_v": -0.006999999999999895,
+      "timestamp": "2026-10-05T13:06:18.239682+11:00"
+    },
+    {
+      "pwm_code": 2048,
+      "target_v": 2.5006105006105006,
+      "kind": "sweep",
+      "direction": "up",
+      "measured_v": 2.494,
+      "duty_percent": 50.01221001221001,
+      "error_v": -0.006610500610500392,
+      "timestamp": "2026-10-05T13:06:36.665313+11:00"
+    },
+    {
+      "pwm_code": 2457,
+      "target_v": 3.0,
+      "kind": "sweep",
+      "direction": "up",
+      "measured_v": 2.994,
+      "duty_percent": 60.0,
+      "error_v": -0.005999999999999783,
+      "timestamp": "2026-10-05T13:07:02.924851+11:00"
+    },
+    {
+      "pwm_code": 2866,
+      "target_v": 3.4993894993894994,
+      "kind": "sweep",
+      "direction": "up",
+      "measured_v": 3.495,
+      "duty_percent": 69.98778998778998,
+      "error_v": -0.004389499389499285,
+      "timestamp": "2026-10-05T13:07:23.825095+11:00"
+    },
+    {
+      "pwm_code": 3276,
+      "target_v": 4.0,
+      "kind": "sweep",
+      "direction": "up",
+      "measured_v": 3.998,
+      "duty_percent": 80.0,
+      "error_v": -0.0019999999999997797,
+      "timestamp": "2026-10-05T13:07:37.902074+11:00"
+    },
+    {
+      "pwm_code": 3686,
+      "target_v": 4.500610500610501,
+      "kind": "sweep",
+      "direction": "up",
+      "measured_v": 4.503,
+      "duty_percent": 90.01221001221002,
+      "error_v": 0.0023894993894995054,
+      "timestamp": "2026-10-05T13:07:53.683742+11:00"
+    },
+    {
+      "pwm_code": 4095,
+      "target_v": 5.0,
+      "kind": "sweep",
+      "direction": "up",
+      "measured_v": 5.002,
+      "duty_percent": 100.0,
+      "error_v": 0.0019999999999997797,
+      "timestamp": "2026-10-05T13:08:07.154365+11:00"
+    },
+    {
+      "pwm_code": 4095,
+      "target_v": 5.0,
+      "kind": "sweep",
+      "direction": "down",
+      "measured_v": 5.003,
+      "duty_percent": 100.0,
+      "error_v": 0.0030000000000001137,
+      "timestamp": "2026-10-05T13:08:25.390292+11:00"
+    },
+    {
+      "pwm_code": 3686,
+      "target_v": 4.500610500610501,
+      "kind": "sweep",
+      "direction": "down",
+      "measured_v": 4.503,
+      "duty_percent": 90.01221001221002,
+      "error_v": 0.0023894993894995054,
+      "timestamp": "2026-10-05T13:08:41.572984+11:00"
+    },
+    {
+      "pwm_code": 3276,
+      "target_v": 4.0,
+      "kind": "sweep",
+      "direction": "down",
+      "measured_v": 3.999,
+      "duty_percent": 80.0,
+      "error_v": -0.0009999999999998899,
+      "timestamp": "2026-10-05T13:08:54.684637+11:00"
+    },
+    {
+      "pwm_code": 2866,
+      "target_v": 3.4993894993894994,
+      "kind": "sweep",
+      "direction": "down",
+      "measured_v": 3.495,
+      "duty_percent": 69.98778998778998,
+      "error_v": -0.004389499389499285,
+      "timestamp": "2026-10-05T13:09:15.046707+11:00"
+    },
+    {
+      "pwm_code": 2457,
+      "target_v": 3.0,
+      "kind": "sweep",
+      "direction": "down",
+      "measured_v": 2.994,
+      "duty_percent": 60.0,
+      "error_v": -0.005999999999999783,
+      "timestamp": "2026-10-05T13:09:33.839739+11:00"
+    },
+    {
+      "pwm_code": 2048,
+      "target_v": 2.5006105006105006,
+      "kind": "sweep",
+      "direction": "down",
+      "measured_v": 2.494,
+      "duty_percent": 50.01221001221001,
+      "error_v": -0.006610500610500392,
+      "timestamp": "2026-10-05T13:09:51.572650+11:00"
+    },
+    {
+      "pwm_code": 1638,
+      "target_v": 2.0,
+      "kind": "sweep",
+      "direction": "down",
+      "measured_v": 1.994,
+      "duty_percent": 40.0,
+      "error_v": -0.006000000000000005,
+      "timestamp": "2026-10-05T13:10:12.213517+11:00"
+    },
+    {
+      "pwm_code": 1228,
+      "target_v": 1.4993894993894994,
+      "kind": "sweep",
+      "direction": "down",
+      "measured_v": 1.495,
+      "duty_percent": 29.987789987789988,
+      "error_v": -0.004389499389499285,
+      "timestamp": "2026-10-05T13:10:25.235350+11:00"
+    },
+    {
+      "pwm_code": 819,
+      "target_v": 1.0,
+      "kind": "sweep",
+      "direction": "down",
+      "measured_v": 0.998,
+      "duty_percent": 20.0,
+      "error_v": -0.0020000000000000018,
+      "timestamp": "2026-10-05T13:10:39.326451+11:00"
+    },
+    {
+      "pwm_code": 410,
+      "target_v": 0.5006105006105006,
+      "kind": "sweep",
+      "direction": "down",
+      "measured_v": 0.5017,
+      "duty_percent": 10.012210012210012,
+      "error_v": 0.0010894993894994265,
+      "timestamp": "2026-10-05T13:11:00.153981+11:00"
+    },
+    {
+      "pwm_code": 0,
+      "target_v": 0.0,
+      "kind": "sweep",
+      "direction": "down",
+      "measured_v": 0.0074,
+      "duty_percent": 0.0,
+      "error_v": 0.0074,
+      "timestamp": "2026-10-05T13:11:29.410623+11:00"
+    }
+  ],
+  "calibration_points": [
+    [
+      0.0074,
+      0
+    ],
+    [
+      0.5017,
+      410
+    ],
+    [
+      0.998,
+      819
+    ],
+    [
+      1.495,
+      1228
+    ],
+    [
+      1.993,
+      1638
+    ],
+    [
+      2.494,
+      2048
+    ],
+    [
+      2.994,
+      2457
+    ],
+    [
+      3.495,
+      2866
+    ],
+    [
+      3.998,
+      3276
+    ],
+    [
+      4.503,
+      3686
+    ],
+    [
+      5.002,
+      4095
+    ]
+  ],
+  "measured_min_v": 0.0074,
+  "measured_max_v": 5.003
+}

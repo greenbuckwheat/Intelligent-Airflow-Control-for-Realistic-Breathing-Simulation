@@ -1,0 +1,113 @@
+{
+  "file": "new.csv",
+  "samples": 1026,
+  "duration_s": 20.590000000000032,
+  "sensor_status": [
+    "OK"
+  ],
+  "faults": [
+    "NONE"
+  ],
+  "ppv_v": [
+    0.0
+  ],
+  "dt_median_s": 0.01999999999998181,
+  "dt_max_s": 0.06799999999998363,
+  "events": [
+    {
+      "\u4e3b\u673a\u65f6\u95f4": "2026-10-09T14:02:34.082+11:00",
+      "MCU\u65f6\u95f4\u6233ms": "967155",
+      "\u64cd\u4f5c\u4e8b\u4ef6": "RECORD_START"
+    },
+    {
+      "\u4e3b\u673a\u65f6\u95f4": "2026-10-09T14:02:35.183+11:00",
+      "MCU\u65f6\u95f4\u6233ms": "968215",
+      "\u64cd\u4f5c\u4e8b\u4ef6": "ATM_OFF"
+    },
+    {
+      "\u4e3b\u673a\u65f6\u95f4": "2026-10-09T14:02:35.788+11:00",
+      "MCU\u65f6\u95f4\u6233ms": "968835",
+      "\u64cd\u4f5c\u4e8b\u4ef6": "VAC_OFF"
+    },
+    {
+      "\u4e3b\u673a\u65f6\u95f4": "2026-10-09T14:02:37.649+11:00",
+      "MCU\u65f6\u95f4\u6233ms": "970675",
+      "\u64cd\u4f5c\u4e8b\u4ef6": "VAC_ON"
+    },
+    {
+      "\u4e3b\u673a\u65f6\u95f4": "2026-10-09T14:02:43.163+11:00",
+      "MCU\u65f6\u95f4\u6233ms": "976203",
+      "\u64cd\u4f5c\u4e8b\u4ef6": "ATM_ON"
+    },
+    {
+      "\u4e3b\u673a\u65f6\u95f4": "2026-10-09T14:02:53.387+11:00",
+      "MCU\u65f6\u95f4\u6233ms": "986445",
+      "\u64cd\u4f5c\u4e8b\u4ef6": "ATM_OFF"
+    },
+    {
+      "\u4e3b\u673a\u65f6\u95f4": "2026-10-09T14:02:54.731+11:00",
+      "MCU\u65f6\u95f4\u6233ms": "987765",
+      "\u64cd\u4f5c\u4e8b\u4ef6": "RECORD_STOP"
+    }
+  ],
+  "segments": [
+    {
+      "state": 0,
+      "start_s": 0.0,
+      "end_s": 3.6000000000000227,
+      "duration_s": 3.6000000000000227,
+      "min_slm": 0.0,
+      "max_slm": 0.033,
+      "baseline_slm": 0.0,
+      "signed_volume_ml": 0.13199999999994244,
+      "tail_median_slm": 0.0,
+      "peak_time_from_state_s": 0.2400000000000091
+    },
+    {
+      "state": 2,
+      "start_s": 3.6680000000000064,
+      "end_s": 9.128000000000043,
+      "duration_s": 5.460000000000036,
+      "min_slm": -58.167,
+      "max_slm": 0.0,
+      "baseline_slm": 0.0,
+      "signed_volume_ml": -1639.0571666666374,
+      "tail_median_slm": -3.133,
+      "peak_time_from_state_s": 0.12000000000000455,
+      "fitted_volume_ml": 1639.3098146616592,
+      "tau_s": 1.1716512518370394,
+      "apparent_delay_s": 0.15044825790718747,
+      "cumulative_r2": 0.9971791901967108,
+      "cumulative_rmse_ml": 24.123498345581602
+    },
+    {
+      "state": 1,
+      "start_s": 9.190000000000055,
+      "end_s": 19.350000000000023,
+      "duration_s": 10.159999999999968,
+      "min_slm": -2.333,
+      "max_slm": 77.9,
+      "baseline_slm": 0.0,
+      "signed_volume_ml": 1623.9640000000404,
+      "tail_median_slm": 0.2,
+      "peak_time_from_state_s": 0.17999999999994998,
+      "fitted_volume_ml": 1613.132552666304,
+      "tau_s": 0.7823973342603451,
+      "apparent_delay_s": 0.7100265774299079,
+      "cumulative_r2": 0.9901838883126954,
+      "cumulative_rmse_ml": 44.75732518581087
+    },
+    {
+      "state": 0,
+      "start_s": 19.370000000000005,
+      "end_s": 20.590000000000032,
+      "duration_s": 1.2200000000000273,
+      "min_slm": -0.2,
+      "max_slm": 0.433,
+      "baseline_slm": 0.0,
+      "signed_volume_ml": 0.3721666666665812,
+      "tail_median_slm": 0.0,
+      "peak_time_from_state_s": 0.08000000000004093
+    }
+  ]
+}

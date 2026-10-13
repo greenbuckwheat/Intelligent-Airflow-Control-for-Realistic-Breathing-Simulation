@@ -1,0 +1,82 @@
+{
+  "sources": [
+    {
+      "file": "3.8.csv",
+      "sha256": "dc0fc13e039b05ba11f318b97e66a384fdc129be27dce64e27cc05c9bef97a47"
+    },
+    {
+      "file": "3.85.csv",
+      "sha256": "f8acc3fd035a497264d394b68ae399daa2c5aacc9cdf8f65c67f1c94e582a8d1"
+    },
+    {
+      "file": "3.9.csv",
+      "sha256": "6a250fdcf96afa603d9ffdf9d9bb603d32a143d1b5062f72c66be615b6de0ce2"
+    },
+    {
+      "file": "3.95.csv",
+      "sha256": "f5d16c47d84efba2ff70d1e2ac88919c5d782e5c196e4b7627719be7bd4be0ff"
+    },
+    {
+      "file": "4.0.csv",
+      "sha256": "9530573269f58149528a6deb1a66abba856d7ea11a2af7c25ff74be50bbdeced"
+    },
+    {
+      "file": "4.05.csv",
+      "sha256": "e021911e1eaf5ccfe5c5dd702f67ef94354498ae09606d1248342a25885733ae"
+    },
+    {
+      "file": "4.1.csv",
+      "sha256": "b7df056bf2464c81b2af625cead51a7ee87b8ce081c78916cd032027aceacc29"
+    },
+    {
+      "file": "4.15.csv",
+      "sha256": "4231ecda7f34c6cde96a825202f0bec3e9c34a27ab0a59ff2ca38252ce3747dd"
+    },
+    {
+      "file": "4.2.csv",
+      "sha256": "3819e823c6c4e2d10b71df97511cb582b80ec62fc628e19e8bdcfc7788aa3319"
+    },
+    {
+      "file": "4.25.csv",
+      "sha256": "9c41090ce8d93c955b6d9e082d5856a6f8f7b7c690b59bfb295f0a95eaa257ff"
+    },
+    {
+      "file": "4.3.csv",
+      "sha256": "3b4ff7cea3efeae6b8305f876ae29ad330d814e48e831a1ee6ab2c6f7ed690aa"
+    },
+    {
+      "file": "4.35.csv",
+      "sha256": "036772262f4c21cb3ac8b11e5d76db137a93f548dd0c61f81e044a5580f722a3"
+    },
+    {
+      "file": "4.5.csv",
+      "sha256": "2449a81270736e8b17c1447557149363357e48ba849cb704d245aa4056aff94b"
+    }
+  ],
+  "parameters": {
+    "ATM": {
+      "tau0_s": 0.743,
+      "plateau_end_v": 4.0986,
+      "gamma": 1.496,
+      "max_relative_tau_error": 0.192362727984295
+    },
+    "VAC": {
+      "tau0_s": 0.2678,
+      "plateau_end_v": 4.1779,
+      "gamma": 2.0621,
+      "max_relative_tau_error": 0.13756197171453732
+    }
+  },
+  "model_amplitude_ml": 323.9,
+  "closure_v": 4.35,
+  "notes": [
+    "Replacement hardware batch only; October 9 is not pooled.",
+    "4.5.csv is confirmed 4.05 V, both routing valves closed; no response fit.",
+    "No-delay cumulative exponential fits, R2 >= .95, >=3 tau, >=200 mL, tail <=.5 SLM.",
+    "Each voltage median has equal weight in log-tau power-law fit.",
+    "Plateau tau is extrapolated below the measured 3.8 V boundary.",
+    "Amplitude is exchanged standard-flow volume, not geometric capacity.",
+    "Single shared closure retained: insufficient evidence for separate closure values.",
+    "This is a descriptive initial controller model, not closed-loop validation."
+  ]
+}
