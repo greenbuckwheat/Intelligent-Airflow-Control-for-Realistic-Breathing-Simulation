@@ -6,9 +6,9 @@ static float calibratedFlow(float raw, float offset, float gain, int8_t sign) {
   return sign * gain * (raw - offset);
 }
 
-// The 2026-10-12 sweep showed an approximately constant VAC bypass tail from
-// 3.80 through 4.30 V.  It disappears only in the final pinch interval near
-// 4.35 V, so conductance-power scaling is not physically representative.
+// The October 14 afternoon data give a calibrated VAC plateau near 1.0122 SLM.
+// Final-interval linear roll-off is a provisional model convention; precise
+// near-closure bypass was not separately identified by the sweep.
 static float vacLeakAtVoltage(float plateauLeak, float ppvVolts,
                               float rolloffStartVolts, float closureVolts) {
   if (plateauLeak <= 0.0f || ppvVolts >= closureVolts) return 0.0f;

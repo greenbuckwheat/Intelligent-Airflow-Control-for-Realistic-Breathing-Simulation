@@ -1,8 +1,9 @@
-"""PyQt5 visual digital twin for a single 250 mL LungLogic lung model.
+"""PyQt5 simulation entry point and historical single-lung research helpers.
 
-This is a one-lung version of the dual-branch GUI.  The breathing parameters
-are converted into the same control actions: two routing solenoid valves
-(atmosphere and vacuum) plus one proportional pinch valve command.
+Normal startup uses the hardware-aligned UI and protocol-21 virtual backend.
+The original finite-fill simulation remains available with --legacy for old
+research scripts. Shared dataclass defaults are intentionally unchanged because
+the hardware GUI imports them; normal simulation loads the hardware reference.
 """
 
 from __future__ import annotations
@@ -145,6 +146,36 @@ class SingleLungConfig:
     max_lung_volume_ml: float = 250.0
     max_abs_flow_slm: float = 220.0
     random_seed: int = 7
+    # Hardware-only switches; absent in older files means FF stays enabled.
+    hardware_ff_inspiration_enabled: bool = True
+    hardware_ff_expiration_enabled: bool = False
+    hardware_expiration_integral_limit: float = 4.0
+    hardware_expiration_kp: float = 0.01
+    hardware_expiration_ki: float = 0.06
+    hardware_expiration_kd: float = 0.0
+    # Lowest inspiration PPV voltage; 0 allows full open. Below ~3 V the
+    # measured ATM conductance gains only ~4% but the stroke grows ~2.5x.
+    hardware_inspiration_min_v: float = 3.0
+    # Hardware PPV transition before VAC (protocol 17). The estimated position
+    # is open-loop, so VAC also waits this long after the close command.
+    # dead_time_within_cycle doubles as the hardware "transition inside 60/bpm".
+    # Since the close command. 1.0 s restored on 2026-10-22: 0.6 s surged after
+    # deep inspiration ends, and the 4.5/5.0 V response-based variants snapped
+    # open mid-expiration (-20 to -45 SLM).
+    hardware_transition_dwell_min_s: float = 1.0
+    hardware_transition_overclose_v: float = 0.0  # A/B option; 0 = target closureV.
+    # Protocol 18: both routes stay closed this long after VAC closes before ATM
+    # opens. The VAC tail is a -3..-7 SLM plateau drawing ~17 mL from the bag
+    # that ends 180-300 ms after VAC closes (2026-10-22 0.5 s runs).
+    hardware_inspiration_dwell_min_s: float = 0.35
+    # Protocol 19 option: VAC opens this long after the estimated PPV reaches
+    # the close target. 0 = protocol 17 behaviour (fixed dwell only).
+    hardware_transition_settle_s: float = 0.0
+    # Protocol 20: VAC zero opening (seal voltage). The VAC map is shifted, so
+    # caps and gains keep their volts-per-opening meaning; inspiration keeps
+    # lung.hardware_closure_v.
+    # 4.32 V: best 2026-10-22 afternoon runs (4.30 V leaked from ~15:00).
+    hardware_expiration_closure_v: float = 4.32
     lung: LungParameters = field(default_factory=LungParameters)
     pi: PIDParameters = field(default_factory=PIDParameters)
     smith: SmithPredictorParameters = field(default_factory=SmithPredictorParameters)
@@ -179,10 +210,10 @@ class SingleLungConfig:
     def validate(self) -> None:
         if not (20.0 <= self.control_hz <= 200.0):
             raise ValueError("control_hz must be 20..200 Hz")
-        if not (1.0 <= self.respiratory_rate_bpm <= 40.0):
-            raise ValueError("respiratory_rate_bpm must be 1..40")
-        if not (1 <= self.cycles <= 100):
-            raise ValueError("simulation cycles must be 1..100")
+        if not (math.isfinite(self.respiratory_rate_bpm) and self.respiratory_rate_bpm > 0):
+            raise ValueError("respiratory_rate_bpm must be positive")
+        if self.cycles < 1:
+            raise ValueError("cycles must be at least 1")
         if self.ie_inspiration <= 0 or self.ie_expiration <= 0:
             raise ValueError("I:E components must be positive")
         if not (0 < self.target_volume_ml <= self.max_lung_volume_ml):
@@ -228,8 +259,8 @@ class SingleLungConfig:
             raise ValueError("integral_limit must be positive")
         if self.smith.delay_s < 0 or self.smith.delay_s > 1.0:
             raise ValueError("smith delay_s must be 0..1 s")
-        if self.smith.correction_gain < 0 or self.smith.correction_gain > 2.0:
-            raise ValueError("smith correction gain must be 0..2")
+        if self.smith.correction_gain < 0:
+            raise ValueError("smith correction gain must be non-negative")
         if self.input_delay.delay_s < 0 or self.input_delay.delay_s > 1.0:
             raise ValueError("input delay_s must be 0..1 s")
 
@@ -1062,7 +1093,16 @@ class FormulaDialog(QtWidgets.QDialog):
         layout = QtWidgets.QVBoxLayout(self)
         tabs = QtWidgets.QTabWidget()
         applied = parent.cfg if parent is not None and hasattr(parent, "cfg") else SingleLungConfig()
-        for title, body in self._pages(applied):
+        for index, (title, body) in enumerate(self._pages(applied)):
+            if index == 0:
+                body = (
+                    "<p class='note'><b>LEGACY RESEARCH MODEL:</b> this guide describes "
+                    "the historical finite-fill simulation. Normal startup of "
+                    "single_lung_pid_gui.py now opens the hardware-aligned protocol-21 "
+                    "virtual application and its shared, updated operation guide. "
+                    "Use --legacy only to reproduce old studies. The old model and "
+                    "its settings are not synchronized with the hardware controller.</p>"
+                ) + body
             page = QtWidgets.QTextBrowser()
             page.setFont(QtGui.QFont("Segoe UI", 10))
             page.setHtml(self._styled_html(body))
@@ -1340,6 +1380,10 @@ class FormulaDialog(QtWidgets.QDialog):
 
 
 class MainWindow(QtWidgets.QMainWindow):
+    """Historical --legacy UI, retained for reproducible finite-fill studies.
+
+    Normal script startup uses HardwareAlignedSimulationWindow instead.
+    """
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("LungLogic PID Digital Twin | Single 250 mL Lung")
@@ -2003,10 +2047,21 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
 def main() -> int:
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--config", type=Path, help="Read an alternate configuration; never overwrites the hardware reference")
+    parser.add_argument("--legacy", action="store_true", help="Open the historical finite-fill research GUI (not hardware-aligned)")
+    args = parser.parse_args()
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle("Fusion")
     app.setFont(QtGui.QFont("Segoe UI", 9))
-    window = MainWindow()
+    if args.legacy:
+        window = MainWindow()
+        window.setWindowTitle("LungLogic LEGACY finite-fill research simulation | Not hardware-aligned")
+    else:
+        from single_lung_simulation_gui import create_window
+        window = create_window(args.config)
     window.show()
     return app.exec_()
 

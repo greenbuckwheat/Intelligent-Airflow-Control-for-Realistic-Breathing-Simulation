@@ -3,6 +3,12 @@
 #include "../firmware/single_lung_controller_stm32/flow_calibration.h"
 static bool near(float a, float b) { return fabsf(a-b) < 1e-5f; }
 int main() {
+  // The newly observed VAC tail remains present through 4.259 V.
+  assert(near(vacLeakAtVoltage(1.0122f, 4.25f, 4.259f, 4.30f), 1.0122f));
+  assert(near(vacLeakAtVoltage(1.0122f, 4.259f, 4.259f, 4.30f), 1.0122f));
+  assert(near(vacLeakAtVoltage(1.0122f, 4.2795f, 4.259f, 4.30f), .5061f));
+  assert(near(vacLeakAtVoltage(1.0122f, 4.30f, 4.259f, 4.30f), 0));
+  assert(near(netLungFlow(-1.0122f, 2, 1.0122f), 0));
   assert(near(calibratedFlow(.0034f, .0034f, 1.0471f, 1), 0));
   assert(near(calibratedFlow(10.0034f, .0034f, 1.0471f, 1), 10.471f));
   assert(near(calibratedFlow(10.0034f, .0034f, 1.0471f, -1), -10.471f));

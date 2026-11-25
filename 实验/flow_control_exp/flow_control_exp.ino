@@ -8,7 +8,7 @@
  *   Left ATM solenoid:   D11
  *   Left VAC solenoid:   D13
  *   Left PPV PWM output: D5, through external filter/0-5 V interface
- *   E-stop input:        D8, active low
+ *   E-stop input:        D8, active low; disabled for current bench setup
  *   SFM3300 flow sensor: directly connected to software I2C A4/A5
  *
  * Serial protocol, 115200 baud, newline terminated:
@@ -21,8 +21,9 @@
  *   ZERO_FLOW
  *
  * Telemetry:
- *   READY,FLOW_EXP_G474,1
- *   TEL,ms,flow_slm,atm,vac,ppv_v,ppv_pwm_code,p_model_kpa,p_syringe_kpa,sensor_status,fault
+ *   READY,FLOW_EXP_G474,2
+ *   TEL,ms,flow_slm,atm,vac,ppv_v,ppv_pwm_code,p_model_kpa,p_syringe_kpa,sensor_status,fault,
+ *       sample_ms,raw_code,uncorrected_slm,zero_offset_slm,sampled_atm,sampled_vac,sampled_ppv_v
  *
  * PPV convention follows the current project convention:
  *   0 V = fully open, higher voltage = gradually clamped, 5 V = closed.
@@ -34,6 +35,7 @@
  */
 
 #include <Arduino.h>
+#include "flow_zero.h"
 
 #if !defined(ARDUINO_NUCLEO_G474RE)
 #error "Select Nucleo-64 / Nucleo G474RE in STM32 MCU based boards"
@@ -44,7 +46,9 @@
 #endif
 
 #ifndef USE_D8_ESTOP_INPUT
-#define USE_D8_ESTOP_INPUT 1
+// No emergency-stop button connected on the current PPV characterization bench.
+// Set to 1 to restore active-low D8 detection when the input is wired.
+#define USE_D8_ESTOP_INPUT 0
 #endif
 
 static const uint32_t BAUD = 115200;
@@ -86,6 +90,20 @@ static bool vacOpen = false;
 static uint16_t ppvMv = 0;
 static uint16_t ppvCode = 0;
 static float flowOffsetSlm = 0.0f;
+static float uncorrectedFlowSlm = NAN;
+static uint32_t flowSampleMs = 0;
+static bool sampledAtm = false, sampledVac = false;
+static uint16_t sampledPpvMv = 0;
+static FlowZeroAverage zeroAverage;
+static bool zeroPending = false;
+static uint32_t zeroStartMs = 0;
+
+static void cancelZero(const char *reason) {
+  if (!zeroPending) return;
+  zeroPending = false;
+  Serial.print(F("ERR,ZERO_FLOW,"));
+  Serial.println(reason);
+}
 static float flowSlm = 0.0f;
 static uint16_t rawFlow = 0;
 static float pressureModelKpa = NAN;
@@ -217,6 +235,7 @@ static void updateOutputActive() {
 }
 
 static void safeStop(const char *reason) {
+  cancelZero("STOP_OR_FAULT");
   closeValves();
   writePpvMv(5000);
   faultStatus = reason;
@@ -274,8 +293,13 @@ static int parseIntStrict(const char *text, int low, int high, bool &ok) {
 }
 
 static void printReady() {
-  Serial.println(F("READY,FLOW_EXP_G474,1"));
+  Serial.println(F("READY,FLOW_EXP_G474,2"));
   Serial.println(F("INFO,ATM=D11,VAC=D13,PPV=D5,ESTOP=D8,P_LEFT=A3,P_RIGHT=A2,SFM=A4/A5_DIRECT"));
+#if USE_D8_ESTOP_INPUT
+  Serial.println(F("INFO,ESTOP_ENABLED=1"));
+#else
+  Serial.println(F("INFO,ESTOP_ENABLED=0"));
+#endif
   Serial.print(F("INFO,PPV_SWEEP_MV="));
   Serial.print(RECOMMENDED_SWEEP_START_MV);
   Serial.print(':');
@@ -287,6 +311,9 @@ static void printReady() {
 }
 
 static void handleCommand() {
+  if (strcmp(rx, "PING") && strcmp(rx, "STATUS") && strcmp(rx, "ZERO_FLOW")) {
+    cancelZero("OUTPUT_COMMAND");
+  }
   if (!strcmp(rx, "HELLO")) {
     hostSeen = true;
     lastHostMs = millis();
@@ -338,13 +365,16 @@ static void handleCommand() {
     Serial.print(',');
     Serial.println(ppvCode);
   } else if (!strcmp(rx, "ZERO_FLOW")) {
+    if (zeroPending) { Serial.println(F("ERR,ZERO_FLOW,BUSY")); return; }
+    if (atmOpen || vacOpen) { Serial.println(F("ERR,ZERO_FLOW,CLOSE_ATM_VAC")); return; }
     if (strcmp(sensorStatus, "OK")) {
       Serial.println(F("ERR,SENSOR_NOT_READY"));
       return;
     }
-    flowOffsetSlm += flowSlm;
-    Serial.print(F("ACK,ZERO_FLOW,"));
-    Serial.println(flowOffsetSlm, 4);
+    zeroAverage.reset();
+    zeroStartMs = millis();
+    zeroPending = true;
+    Serial.println(F("ACK,ZERO_FLOW,START,SETTLE_MS=500,SAMPLES=50,MAX_ABS_SLM=0.5,MAX_SPAN_SLM=0.3"));
   } else if (!strcmp(rx, "STATUS")) {
     Serial.print(F("STATUS,"));
     Serial.print(atmOpen ? 1 : 0);
@@ -378,6 +408,7 @@ static void pollSerial() {
 }
 
 static void sensorFault(const char *status, uint32_t now) {
+  cancelZero("SENSOR_FAULT");
   sensorStatus = status;
   rawFlow = 0;
   flowSlm = 0.0f;
@@ -433,7 +464,28 @@ static void pollSensor() {
   }
 
   rawFlow = ((uint16_t)a << 8) | b;
-  flowSlm = ((float)rawFlow - SFM_OFFSET) / SFM_SCALE - flowOffsetSlm;
+  flowSampleMs = millis();  // Host also receives the independent send timestamp.
+  sampledAtm = atmOpen;
+  sampledVac = vacOpen;
+  sampledPpvMv = ppvMv;
+  uncorrectedFlowSlm = ((float)rawFlow - SFM_OFFSET) / SFM_SCALE;
+  if (zeroPending) {
+    if (atmOpen || vacOpen) cancelZero("VALVES_OPEN");
+    else if ((uint32_t)(flowSampleMs - zeroStartMs) > 4000) cancelZero("TIMEOUT");
+    else if ((uint32_t)(flowSampleMs - zeroStartMs) >= 500) {
+      if (!zeroAverage.add(uncorrectedFlowSlm)) cancelZero("NOT_ZERO_OR_UNSTABLE");
+      else if (zeroAverage.complete()) {
+        flowOffsetSlm = zeroAverage.mean();  // Absolute offset, never cumulative.
+        zeroPending = false;
+        Serial.print(F("ACK,ZERO_FLOW,DONE,"));
+        Serial.print(flowSampleMs); Serial.print(',');
+        Serial.print(flowOffsetSlm, 6); Serial.print(',');
+        Serial.print(zeroAverage.count); Serial.print(',');
+        Serial.println(zeroAverage.high - zeroAverage.low, 6);
+      }
+    }
+  }
+  flowSlm = uncorrectedFlowSlm - flowOffsetSlm;
   sensorStatus = "OK";
   sensorDueMs = now + 20;
 }
@@ -475,7 +527,17 @@ static void telemetry() {
   Serial.print(',');
   Serial.print(sensorStatus);
   Serial.print(',');
-  Serial.println(faultStatus);
+  Serial.print(faultStatus);
+  Serial.print(',');
+  if (!strcmp(sensorStatus, "OK")) {
+    Serial.print(flowSampleMs); Serial.print(',');
+    Serial.print(rawFlow); Serial.print(',');
+    Serial.print(uncorrectedFlowSlm, 6);
+  } else Serial.print(F("nan,nan,nan"));
+  Serial.print(','); Serial.print(flowOffsetSlm, 6);
+  Serial.print(','); Serial.print(sampledAtm ? 1 : 0);
+  Serial.print(','); Serial.print(sampledVac ? 1 : 0);
+  Serial.print(','); Serial.println(sampledPpvMv / 1000.0f, 3);
 }
 
 void setup() {

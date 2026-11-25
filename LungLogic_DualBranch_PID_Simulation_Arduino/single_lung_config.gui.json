@@ -26,7 +26,16 @@
     "sensor_tau_s": 0.02,
     "sensor_noise_slm": 0.1,
     "sensor_bias_slm": 0.0,
-    "flow_sign": 1
+    "flow_sign": 1,
+    "hardware_flow_offset_slm": 0.0034,
+    "hardware_flow_gain": 1.0471,
+    "hardware_vac_leak_slm": 0.814,
+    "hardware_model_volume_ml": 323.9,
+    "hardware_gamma_in": 1.496,
+    "hardware_gamma_out": 2.0621,
+    "hardware_dead_zone_in_v": 4.0986,
+    "hardware_dead_zone_out_v": 4.1779,
+    "hardware_closure_v": 4.35
   },
   "pi": {
     "kp": 0.01,
@@ -38,10 +47,18 @@
   "smith": {
     "enabled": true,
     "delay_s": 0.045,
-    "correction_gain": 0.6
+    "correction_gain": 0.6,
+    "ppv_open_time_s": 2.436,
+    "ppv_close_time_s": 2.436
   },
   "input_delay": {
     "enabled": true,
     "delay_s": 0.025
-  }
+  },
+  "hardware_expiration_kp": 0.01,
+  "hardware_expiration_ki": 0.06,
+  "hardware_expiration_kd": 0.0,
+  "hardware_inspiration_min_v": 3.0,
+  "hardware_expiration_integral_limit": 4.0,
+  "hardware_ff_expiration_enabled": false
 }

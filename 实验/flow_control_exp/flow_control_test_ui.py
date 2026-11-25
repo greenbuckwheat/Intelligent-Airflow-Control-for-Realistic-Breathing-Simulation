@@ -22,7 +22,7 @@ from typing import Optional
 
 
 BAUD = 115200
-READY = "READY,FLOW_EXP_G474,1"
+READY = "READY,FLOW_EXP_G474,2"
 SCRIPT_DIR = Path(__file__).resolve().parent
 DATA_DIR = SCRIPT_DIR / "data"
 PPV_SWEEP_START_V = 3.8
@@ -48,11 +48,18 @@ class Telemetry:
     sensor_status: str
     fault: str
     raw_line: str
+    sample_ms: Optional[int] = None
+    sensor_raw: Optional[int] = None
+    uncorrected_flow_slm: float = math.nan
+    zero_offset_slm: float = math.nan
+    sampled_atm: Optional[int] = None
+    sampled_vac: Optional[int] = None
+    sampled_ppv_v: float = math.nan
 
     @classmethod
     def parse(cls, line: str) -> "Telemetry":
         fields = line.split(",")
-        if len(fields) != 11 or fields[0] != "TEL":
+        if len(fields) not in (11, 18) or fields[0] != "TEL":
             raise ValueError("not FLOW_EXP telemetry")
         sensor_status = fields[9]
         if sensor_status not in {"OK", "STARTING", "I2C", "CRC"}:
@@ -74,6 +81,13 @@ class Telemetry:
             sensor_status=sensor_status,
             fault=fields[10],
             raw_line=line,
+            sample_ms=int(fields[11]) if len(fields) == 18 and sensor_status == "OK" else None,
+            sensor_raw=int(fields[12]) if len(fields) == 18 and sensor_status == "OK" else None,
+            uncorrected_flow_slm=float(fields[13]) if len(fields) == 18 and sensor_status == "OK" else math.nan,
+            zero_offset_slm=float(fields[14]) if len(fields) == 18 else math.nan,
+            sampled_atm=int(fields[15]) if len(fields) == 18 and sensor_status == "OK" else None,
+            sampled_vac=int(fields[16]) if len(fields) == 18 and sensor_status == "OK" else None,
+            sampled_ppv_v=float(fields[17]) if len(fields) == 18 and sensor_status == "OK" else math.nan,
         )
 
 
@@ -162,13 +176,13 @@ def main() -> int:
             self.setCentralWidget(central)
             layout = QtWidgets.QVBoxLayout(central)
 
-            top = QtWidgets.QGroupBox("连接")
+            top = QtWidgets.QGroupBox("Connect")
             top_layout = QtWidgets.QGridLayout(top)
             self.port_combo = QtWidgets.QComboBox()
-            self.refresh_button = QtWidgets.QPushButton("刷新串口")
-            self.connect_button = QtWidgets.QPushButton("连接")
-            self.disconnect_button = QtWidgets.QPushButton("断开")
-            self.status = QtWidgets.QLabel("未连接")
+            self.refresh_button = QtWidgets.QPushButton("Refresh ports")
+            self.connect_button = QtWidgets.QPushButton("Connect")
+            self.disconnect_button = QtWidgets.QPushButton("Disconnect")
+            self.status = QtWidgets.QLabel("Disconnected")
             self.refresh_button.clicked.connect(self.refresh_ports)
             self.connect_button.clicked.connect(self.connect_serial)
             self.disconnect_button.clicked.connect(self.disconnect_serial)
@@ -186,13 +200,13 @@ def main() -> int:
             left_layout = QtWidgets.QVBoxLayout(left)
             splitter.addWidget(left)
 
-            valves = QtWidgets.QGroupBox("方向阀")
+            valves = QtWidgets.QGroupBox("Directional valves")
             valve_layout = QtWidgets.QGridLayout(valves)
-            self.atm_on = QtWidgets.QPushButton("ATM 开启")
-            self.atm_off = QtWidgets.QPushButton("ATM 关闭")
-            self.vac_on = QtWidgets.QPushButton("VAC 开启")
-            self.vac_off = QtWidgets.QPushButton("VAC 关闭")
-            self.stop_all = QtWidgets.QPushButton("全部电磁阀关闭 / STOP")
+            self.atm_on = QtWidgets.QPushButton("ATM ON")
+            self.atm_off = QtWidgets.QPushButton("ATM OFF")
+            self.vac_on = QtWidgets.QPushButton("VAC ON")
+            self.vac_off = QtWidgets.QPushButton("VAC OFF")
+            self.stop_all = QtWidgets.QPushButton("Close all valves / STOP")
             self.stop_all.setStyleSheet("color: #b91c1c; font-weight: bold;")
             self.atm_on.clicked.connect(lambda: self.send("ATM,1", "ATM_ON"))
             self.atm_off.clicked.connect(lambda: self.send("ATM,0", "ATM_OFF"))
@@ -206,7 +220,7 @@ def main() -> int:
             valve_layout.addWidget(self.stop_all, 2, 0, 1, 2)
             left_layout.addWidget(valves)
 
-            ppv = QtWidgets.QGroupBox("PPV 目标电压")
+            ppv = QtWidgets.QGroupBox("PPV target voltage")
             ppv_layout = QtWidgets.QVBoxLayout(ppv)
             buttons = QtWidgets.QGridLayout()
             for i, voltage in enumerate(PPV_SWEEP_VOLTAGES):
@@ -220,39 +234,43 @@ def main() -> int:
             self.ppv_spin.setDecimals(3)
             self.ppv_spin.setSingleStep(PPV_SWEEP_STEP_V)
             self.ppv_spin.setValue(PPV_SWEEP_START_V)
-            custom.addWidget(QtWidgets.QLabel("自定义 V"))
+            custom.addWidget(QtWidgets.QLabel("Custom V"))
             custom.addWidget(self.ppv_spin)
-            custom_button = QtWidgets.QPushButton("发送")
+            custom_button = QtWidgets.QPushButton("Send")
             custom_button.clicked.connect(lambda: self.set_ppv(self.ppv_spin.value()))
             custom.addWidget(custom_button)
             ppv_layout.addLayout(custom)
             hint = QtWidgets.QLabel(
-                "本轮建议：3.800–4.500 V，每档 0.050 V；改变电压后至少等待 "
-                f"{PPV_SETTLE_S:.0f} 秒再取稳态数据。0 V 全开，电压升高逐渐夹紧；"
-                "实际输出需用万用表校准。"
+                "Suggested sweep: 3.800-4.500 V in 0.050 V steps; after each voltage change, wait at least "
+                f"{PPV_SETTLE_S:.0f} seconds before collecting steady-state data. 0 V is fully open; higher voltage increases clamping. "
+                "Calibrate the actual output using a multimeter."
             )
             hint.setWordWrap(True)
             hint.setStyleSheet("color: #475569;")
             ppv_layout.addWidget(hint)
             left_layout.addWidget(ppv)
 
-            record = QtWidgets.QGroupBox("数据记录")
+            record = QtWidgets.QGroupBox("Data recording")
             record_layout = QtWidgets.QGridLayout(record)
-            self.start_record_button = QtWidgets.QPushButton("开始记录")
-            self.stop_record_button = QtWidgets.QPushButton("停止记录")
-            self.zero_flow_button = QtWidgets.QPushButton("流量归零")
+            self.start_record_button = QtWidgets.QPushButton("Start recording")
+            self.stop_record_button = QtWidgets.QPushButton("Stop recording")
+            self.zero_flow_button = QtWidgets.QPushButton("Zero flow")
             self.filename_edit = QtWidgets.QLineEdit()
-            self.filename_edit.setPlaceholderText("例如 function_check_atm.csv 或 ppv_sweep_vac.csv")
+            self.filename_edit.setPlaceholderText("e.g. function_check_atm.csv or ppv_sweep_vac.csv")
             self.filename_edit.setText(
                 f"ppv_sweep_3p8_to_4p5_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
             )
-            self.choose_csv_button = QtWidgets.QPushButton("选择位置")
-            self.record_label = QtWidgets.QLabel("未记录")
+            self.choose_csv_button = QtWidgets.QPushButton("Browse")
+            self.record_label = QtWidgets.QLabel("Not recording")
             self.start_record_button.clicked.connect(self.start_recording)
             self.stop_record_button.clicked.connect(self.stop_recording)
             self.zero_flow_button.clicked.connect(lambda: self.send("ZERO_FLOW", "ZERO_FLOW"))
+            self.zero_flow_button.setToolTip(
+                "Confirm zero physical flow with ATM and VAC closed. Firmware waits 0.5 s and averages 50 fresh samples. "
+                "Excessive or unstable flow rejects zeroing and retains the previous offset. Do not change valves or PPV during zeroing."
+            )
             self.choose_csv_button.clicked.connect(self.choose_csv_path)
-            record_layout.addWidget(QtWidgets.QLabel("CSV 文件名 / 路径"), 0, 0, 1, 2)
+            record_layout.addWidget(QtWidgets.QLabel("CSV filename / path"), 0, 0, 1, 2)
             record_layout.addWidget(self.filename_edit, 1, 0)
             record_layout.addWidget(self.choose_csv_button, 1, 1)
             record_layout.addWidget(self.start_record_button, 2, 0)
@@ -261,43 +279,43 @@ def main() -> int:
             record_layout.addWidget(self.record_label, 4, 0, 1, 2)
             left_layout.addWidget(record)
 
-            monitor = QtWidgets.QGroupBox("实时监测")
+            monitor = QtWidgets.QGroupBox("Live monitor")
             monitor_layout = QtWidgets.QFormLayout(monitor)
             self.metric_flow = self.metric_label()
             self.metric_pressure = self.metric_label()
             self.metric_valves = self.metric_label()
             self.metric_ppv = self.metric_label()
             self.metric_sensor = self.metric_label()
-            monitor_layout.addRow("当前流量", self.metric_flow)
-            monitor_layout.addRow("压力", self.metric_pressure)
-            monitor_layout.addRow("阀门状态", self.metric_valves)
+            monitor_layout.addRow("Current flow", self.metric_flow)
+            monitor_layout.addRow("Pressure", self.metric_pressure)
+            monitor_layout.addRow("Valve status", self.metric_valves)
             monitor_layout.addRow("PPV", self.metric_ppv)
-            monitor_layout.addRow("传感器/故障", self.metric_sensor)
+            monitor_layout.addRow("Sensor / fault", self.metric_sensor)
             left_layout.addWidget(monitor)
 
             docs = QtWidgets.QTextBrowser()
             docs.setHtml(
-                "<h3>两个初步实验</h3>"
-                "<p>本工具用于开放环验证原 hardware 控制代码所依赖的实际硬件行为，"
-                "不修改原 GUI 或原固件文件。</p>"
+                "<h3>Two preliminary experiments</h3>"
+                "<p>This tool performs open-loop checks of the physical behavior assumed by the hardware controller. "
+                "It does not modify the original GUI or controller firmware.</p>"
                 "<table border='1' cellspacing='0' cellpadding='5'>"
-                "<tr><th>实验</th><th>目的</th><th>如何使用程序</th></tr>"
+                "<tr><th>Experiment</th><th>Purpose</th><th>Procedure</th></tr>"
                 "<tr>"
-                "<td>功能验证实验</td>"
-                "<td>确认指令能正确控制 ATM/VAC 两个电磁阀，并确认 PPV 能调节气流。</td>"
-                "<td>分别操作 ATM、VAC 和 PPV，观察实际动作、流量响应和阀门状态。</td>"
+                "<td>Functional verification</td>"
+                "<td>Verify ATM/VAC solenoid commands and PPV flow adjustment.</td>"
+                "<td>Operate ATM, VAC and PPV individually; observe physical motion, flow response and valve status.</td>"
                 "</tr>"
                 "<tr>"
-                "<td>PPV 非线性特性实验</td>"
-                "<td>测量不同 PPV 目标电压下的流量，用于拟合指数 gamma。</td>"
-                "<td>从 3.800 V 开始，以 0.050 V 增加到 4.500 V。每次改变电压后等待至少 3 秒，"
-                "再记录稳态段；ATM 与 VAC 分开测试，并尽量恢复相同袋体体积和源压力。</td>"
+                "<td>PPV nonlinear response</td>"
+                "<td>Measure flow at different PPV target voltages to fit the gamma exponent.</td>"
+                "<td>Sweep from 3.800 to 4.500 V in 0.050 V steps. Wait at least 3 s after each change, "
+                "then record the steady-state segment. Test ATM and VAC separately, restoring comparable bag volume and source pressure.</td>"
                 "</tr>"
                 "</table>"
-                "<p>CSV 会保存 MCU 时间戳、流量、模体侧压力、针筒侧压力、ATM/VAC 状态、"
-                "PPV 目标电压、传感器状态和操作事件。压力通道未接入或未启用时记录为空。</p>"
-                "<p><b>停止记录</b>只关闭 CSV 文件；不会关闭阀门。"
-                "<b>STOP</b>才会关闭 ATM/VAC 并把 PPV 设为 5 V。</p>"
+                "<p>CSV records MCU timestamps, flow, model-side and syringe-side pressure, ATM/VAC status, "
+                "PPV target voltage, sensor status and operator events. Unconnected or disabled pressure channels are left blank.</p>"
+                "<p><b>Stop recording</b> closes the CSV file only; valves remain in their current state. "
+                "<b>STOP</b> closes ATM/VAC and sets PPV to 5 V.</p>"
             )
             left_layout.addWidget(docs, 1)
 
@@ -308,7 +326,7 @@ def main() -> int:
 
             self.canvas = FlowCanvas()
             right_layout.addWidget(self.canvas, 3)
-            log_box = QtWidgets.QGroupBox("串口日志")
+            log_box = QtWidgets.QGroupBox("Serial log")
             log_layout = QtWidgets.QVBoxLayout(log_box)
             self.log = QtWidgets.QPlainTextEdit()
             self.log.setReadOnly(True)
@@ -331,7 +349,7 @@ def main() -> int:
             self.port_combo.clear()
             ports = list(list_ports.comports())
             if not ports:
-                self.port_combo.addItem("未检测到串口", "")
+                self.port_combo.addItem("No serial ports found", "")
                 return
             for port in ports:
                 self.port_combo.addItem(f"{port.device} | {port.description}", port.device)
@@ -339,7 +357,7 @@ def main() -> int:
         def connect_serial(self) -> None:
             port = self.port_combo.currentData()
             if not port:
-                self.log.appendPlainText("请选择有效串口。")
+                self.log.appendPlainText("Select a valid serial port.")
                 return
             self.disconnect_serial(send_stop=False)
             try:
@@ -355,12 +373,12 @@ def main() -> int:
                 self.canvas.draw_rows([])
                 self.last_rx = time.monotonic()
                 self.conn.write(b"HELLO\n")
-                self.status.setText(f"正在连接 {port} ...")
+                self.status.setText(f"Connecting to {port} ...")
                 self.log.appendPlainText(f"> HELLO ({port})")
             except Exception as exc:
                 self.conn = None
-                self.status.setText("连接失败")
-                self.log.appendPlainText(f"连接失败: {exc}")
+                self.status.setText("Connection failed")
+                self.log.appendPlainText(f"Connection failed: {exc}")
 
         def disconnect_serial(self, send_stop: bool = True) -> None:
             if self.conn is not None:
@@ -375,7 +393,7 @@ def main() -> int:
                     pass
             self.conn = None
             self.ready = False
-            self.status.setText("未连接")
+            self.status.setText("Disconnected")
 
         def set_ppv(self, volts: float) -> None:
             volts = max(0.0, min(5.0, float(volts)))
@@ -384,17 +402,17 @@ def main() -> int:
 
         def send(self, command: str, event: str) -> None:
             if self.conn is None:
-                self.log.appendPlainText("未连接。")
+                self.log.appendPlainText("Disconnected。")
                 return
             if not self.ready and command not in ("HELLO", "PING", "STOP"):
-                self.log.appendPlainText(f"尚未握手到 {READY}，拒绝发送: {command}")
+                self.log.appendPlainText(f"Handshake not received: {READY}; refusing to send: {command}")
                 return
             try:
                 self.conn.write((command + "\n").encode("ascii"))
                 self.log.appendPlainText(f"> {command}")
-                self.write_csv_event(event)
+                self.write_csv_event(event, f"> {command}")
             except Exception as exc:
-                self.log.appendPlainText(f"发送失败: {exc}")
+                self.log.appendPlainText(f"Send failed: {exc}")
                 self.disconnect_serial()
 
         def poll(self) -> None:
@@ -409,7 +427,7 @@ def main() -> int:
                 if waiting:
                     self.rx.extend(self.conn.read(waiting))
                 if len(self.rx) > 16384:
-                    raise RuntimeError("串口缓存异常增长。")
+                    raise RuntimeError("Serial receive buffer exceeded its limit.")
                 while b"\n" in self.rx:
                     raw, _, rest = self.rx.partition(b"\n")
                     self.rx = bytearray(rest)
@@ -418,31 +436,36 @@ def main() -> int:
                         self.last_rx = now
                         self.handle_line(line)
                 if now - self.last_rx > 5.0:
-                    raise RuntimeError("串口超时；将断开连接。")
+                    raise RuntimeError("Serial timeout; disconnecting.")
             except Exception as exc:
                 self.log.appendPlainText(str(exc))
                 self.disconnect_serial()
 
         def handle_line(self, line: str) -> None:
+            if not line.startswith("TEL,") and line != "PONG":
+                self.write_csv_event("RX", line)
             if line == "PONG":
                 return
-            if line == READY:
+            if line in (READY, "READY,FLOW_EXP_G474,1"):
                 if not self.ready:
                     self.ready = True
-                    self.status.setText("已连接实验固件 FLOW_EXP_G474")
+                    self.status.setText("Connected to FLOW_EXP_G474 experiment firmware")
                 self.log.appendPlainText(f"< {line}")
+                if line.endswith(",1"):
+                    self.log.appendPlainText("Legacy firmware lacks raw flow, offset and sample timestamps. Upload v2 for complete calibration recordings.")
                 return
             if line.startswith("READY,") and line != READY:
                 self.ready = False
-                self.status.setText("固件不匹配")
+                self.status.setText("Firmware mismatch")
                 self.log.appendPlainText(f"< {line}")
-                self.log.appendPlainText("请上传 实验/flow_control_exp/flow_control_exp.ino 后再使用此实验 UI。")
+                self.log.appendPlainText("Upload flow_control_exp/flow_control_exp.ino before using this experiment UI.")
                 return
             if line.startswith("TEL,"):
                 try:
                     row = Telemetry.parse(line)
                 except ValueError:
                     self.log.appendPlainText(f"< malformed: {line}")
+                    self.write_csv_event("MALFORMED_RX", line)
                     return
                 self.latest = row
                 self.update_metrics(row)
@@ -468,35 +491,43 @@ def main() -> int:
             else:
                 self.metric_flow.setText("-- SLM")
             self.metric_pressure.setText(
-                f"模体 {fmt_float(row.pressure_model_kpa)} kPa / "
-                f"针筒 {fmt_float(row.pressure_syringe_kpa)} kPa"
+                f"Model {fmt_float(row.pressure_model_kpa)} kPa / "
+                f"Syringe {fmt_float(row.pressure_syringe_kpa)} kPa"
             )
             self.metric_valves.setText(
-                f"ATM {'开' if row.atm else '关'} / VAC {'开' if row.vac else '关'}"
+                f"ATM {'ON' if row.atm else 'OFF'} / VAC {'ON' if row.vac else 'OFF'}"
             )
             self.metric_ppv.setText(f"{row.ppv_v:.3f} V, PWM {row.ppv_pwm_code}")
             self.metric_sensor.setText(f"{row.sensor_status} / {row.fault}")
 
         def csv_fields(self) -> list[str]:
             return [
-                "主机时间",
-                "MCU时间戳ms",
-                "流量SLM",
-                "ATM状态",
-                "VAC状态",
-                "PPV目标电压V",
-                "PPV_PWM码",
-                "模体侧压力kPa",
-                "针筒侧压力kPa",
-                "传感器状态",
-                "故障",
-                "操作事件",
-                "原始串口行",
+                "host_time",
+                "mcu_ms",
+                "flow_slm",
+                "atm",
+                "vac",
+                "ppv_target_v",
+                "ppv_pwm_code",
+                "pressure_model_kpa",
+                "pressure_syringe_kpa",
+                "sensor_status",
+                "fault",
+                "event",
+                "raw_line",
+                "record_type",
+                "sample_ms",
+                "sensor_raw",
+                "uncorrected_flow_slm",
+                "zero_offset_slm",
+                "sampled_atm",
+                "sampled_vac",
+                "sampled_ppv_target_v",
             ]
 
         def start_recording(self) -> None:
             if self.writer is not None:
-                self.log.appendPlainText("已经在记录。")
+                self.log.appendPlainText("Recording is already active.")
                 return
             DATA_DIR.mkdir(parents=True, exist_ok=True)
             raw_name = self.filename_edit.text().strip()
@@ -509,7 +540,16 @@ def main() -> int:
             if path.suffix.lower() != ".csv":
                 path = path.with_suffix(".csv")
             path.parent.mkdir(parents=True, exist_ok=True)
-            self.csv_file = path.open("w", newline="", encoding="utf-8-sig")
+            # A new recording must not truncate an earlier PPV experiment.
+            base_path = path
+            suffix = 1
+            while True:
+                try:
+                    self.csv_file = path.open("x", newline="", encoding="utf-8-sig")
+                    break
+                except FileExistsError:
+                    path = base_path.with_name(f"{base_path.stem}_{suffix}{base_path.suffix}")
+                    suffix += 1
             self.record_path = path
             self.writer = csv.DictWriter(self.csv_file, fieldnames=self.csv_fields())
             self.writer.writeheader()
@@ -518,8 +558,8 @@ def main() -> int:
             self.plot_count = 0
             self.canvas.draw_rows([])
             self.filename_edit.setText(str(path))
-            self.record_label.setText(f"记录中: {path.name}")
-            self.log.appendPlainText(f"开始记录: {path}")
+            self.record_label.setText(f"Recording: {path.name}")
+            self.log.appendPlainText(f"Start recording: {path}")
             self.write_csv_event("RECORD_START")
 
         def choose_csv_path(self) -> None:
@@ -534,7 +574,7 @@ def main() -> int:
             else:
                 default = DATA_DIR / f"flow_exp_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
             filename, _ = QtWidgets.QFileDialog.getSaveFileName(
-                self, "选择 CSV 保存位置", str(default.with_suffix(".csv")), "CSV files (*.csv)"
+                self, "Choose CSV save location", str(default.with_suffix(".csv")), "CSV files (*.csv)"
             )
             if filename:
                 self.filename_edit.setText(str(Path(filename).with_suffix(".csv")))
@@ -547,42 +587,52 @@ def main() -> int:
             self.csv_file = None
             self.writer = None
             saved_path = self.record_path
-            self.record_label.setText(f"已自动保存: {saved_path}")
-            self.log.appendPlainText(f"停止记录并已保存 CSV: {saved_path}；未发送阀门命令。")
+            self.record_label.setText(f"Saved automatically: {saved_path}")
+            self.log.appendPlainText(f"Recording stopped; CSV saved: {saved_path}; no valve commands were sent.")
 
         def csv_base_row(self, event: str = "") -> dict[str, object]:
-            row = self.latest
+            # Command/ACK rows are events, not copies of the previous sample.
+            # This prevents duplicate timestamps and double-counted volume.
+            row = None if event else self.latest
             now = datetime.now().astimezone().isoformat(timespec="milliseconds")
             if row is None:
                 return {
-                    "主机时间": now,
-                    "MCU时间戳ms": "",
-                    "流量SLM": "",
-                    "ATM状态": "",
-                    "VAC状态": "",
-                    "PPV目标电压V": "",
-                    "PPV_PWM码": "",
-                    "模体侧压力kPa": "",
-                    "针筒侧压力kPa": "",
-                    "传感器状态": "",
-                    "故障": "",
-                    "操作事件": event,
-                    "原始串口行": "",
+                    "host_time": now,
+                    "mcu_ms": "",
+                    "flow_slm": "",
+                    "atm": "",
+                    "vac": "",
+                    "ppv_target_v": "",
+                    "ppv_pwm_code": "",
+                    "pressure_model_kpa": "",
+                    "pressure_syringe_kpa": "",
+                    "sensor_status": "",
+                    "fault": "",
+                    "event": event,
+                    "raw_line": "",
                 }
             return {
-                "主机时间": now,
-                "MCU时间戳ms": row.mcu_ms,
-                "流量SLM": row.flow_slm if math.isfinite(row.flow_slm) else "",
-                "ATM状态": row.atm,
-                "VAC状态": row.vac,
-                "PPV目标电压V": row.ppv_v,
-                "PPV_PWM码": row.ppv_pwm_code,
-                "模体侧压力kPa": "" if math.isnan(row.pressure_model_kpa) else row.pressure_model_kpa,
-                "针筒侧压力kPa": "" if math.isnan(row.pressure_syringe_kpa) else row.pressure_syringe_kpa,
-                "传感器状态": row.sensor_status,
-                "故障": row.fault,
-                "操作事件": event,
-                "原始串口行": row.raw_line,
+                "host_time": now,
+                "mcu_ms": row.mcu_ms,
+                "flow_slm": row.flow_slm if math.isfinite(row.flow_slm) else "",
+                "atm": row.atm,
+                "vac": row.vac,
+                "ppv_target_v": row.ppv_v,
+                "ppv_pwm_code": row.ppv_pwm_code,
+                "pressure_model_kpa": "" if math.isnan(row.pressure_model_kpa) else row.pressure_model_kpa,
+                "pressure_syringe_kpa": "" if math.isnan(row.pressure_syringe_kpa) else row.pressure_syringe_kpa,
+                "sensor_status": row.sensor_status,
+                "fault": row.fault,
+                "event": event,
+                "raw_line": row.raw_line,
+                "record_type": "telemetry",
+                "sample_ms": row.sample_ms if row.sample_ms is not None else "",
+                "sensor_raw": row.sensor_raw if row.sensor_raw is not None else "",
+                "uncorrected_flow_slm": row.uncorrected_flow_slm if math.isfinite(row.uncorrected_flow_slm) else "",
+                "zero_offset_slm": row.zero_offset_slm if math.isfinite(row.zero_offset_slm) else "",
+                "sampled_atm": row.sampled_atm if row.sampled_atm is not None else "",
+                "sampled_vac": row.sampled_vac if row.sampled_vac is not None else "",
+                "sampled_ppv_target_v": row.sampled_ppv_v if math.isfinite(row.sampled_ppv_v) else "",
             }
 
         def write_csv_telemetry(self, row: Telemetry) -> None:
@@ -591,10 +641,13 @@ def main() -> int:
             self.writer.writerow(self.csv_base_row(""))
             self.csv_file.flush()
 
-        def write_csv_event(self, event: str) -> None:
+        def write_csv_event(self, event: str, raw_line: str = "") -> None:
             if self.writer is None:
                 return
-            self.writer.writerow(self.csv_base_row(event))
+            record = self.csv_base_row(event)
+            record["record_type"] = "event"
+            record["raw_line"] = raw_line
+            self.writer.writerow(record)
             self.csv_file.flush()
 
         def closeEvent(self, event) -> None:

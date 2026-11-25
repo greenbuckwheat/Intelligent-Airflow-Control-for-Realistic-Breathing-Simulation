@@ -3,7 +3,7 @@
  * Protocol: READY,LUNGLOGIC_CAL_G474,2 / RUN / STOP / PING / CAL
  *
  * Final PCB allocation (left branch)
- *   ATM D11, VAC D13, PPV PWM D5, optional active-low E-stop D8
+ *   ATM D11, VAC D13, PPV PWM D5 (D8 emergency-stop input not used)
  *   SFM3300 through Pa.Hub channel 0 on software-I2C A4/A5
  *
  * Norgren 8254200.9151.02400 routing valves are 24 VDC, 2/2 NC loads.
@@ -21,15 +21,11 @@
 #ifndef VALVE_ACTIVE_HIGH
 #define VALVE_ACTIVE_HIGH 1
 #endif
-#ifndef USE_D8_ESTOP_INPUT
-#define USE_D8_ESTOP_INPUT 1
-#endif
 
 static const uint32_t BAUD = 115200;
 static const uint32_t PIN_ATM = D11;
 static const uint32_t PIN_VAC = D13;
 static const uint32_t PIN_PPV_PWM = D5;
-static const uint32_t PIN_ESTOP = D8;
 static const uint32_t SDA_PIN = A4;
 static const uint32_t SCL_PIN = A5;
 static const uint8_t TCA_ADDR = 0x70;
@@ -129,14 +125,6 @@ static uint8_t sfmCrc(uint8_t first, uint8_t second) {
   return crc;
 }
 
-static bool estopActive() {
-#if USE_D8_ESTOP_INPUT
-  return digitalRead(PIN_ESTOP) == LOW;
-#else
-  return false;
-#endif
-}
-
 static void setPpvOpening(float opening) {
   appliedOpening = clampf(opening, 0.0f, 1.0f);
   commandV = 5.0f * (1.0f - appliedOpening);  // PPV40V: 0 V open, 5 V closed.
@@ -189,7 +177,6 @@ static void startTrial(const String &line) {
   if (count != 8) { Serial.println("ERR,RUN_FORMAT"); return; }
   if (stage != IDLE) { Serial.println("ERR,BUSY"); return; }
   if (strcmp(sensorStatus, "OK")) { Serial.println("ERR,SENSOR_NOT_READY"); return; }
-  if (estopActive()) { Serial.println("ERR,ESTOP_ACTIVE"); return; }
 
   uint32_t id = (uint32_t)f[1].toInt();
   int direction = f[2].toInt();
@@ -229,7 +216,7 @@ static void handleLine(const String &raw) {
   if (line == "HELLO") {
     safeOutputs(); stage = IDLE; trialId = 0;
     Serial.println("READY,LUNGLOGIC_CAL_G474,2");
-    Serial.println("INFO,ATM=D11,VAC=D13,PPV=D5,ESTOP=D8,SFM_CH=0");
+    Serial.println("INFO,ATM=D11,VAC=D13,PPV=D5,SFM_CH=0");
   } else if (line == "PING") {
     Serial.println("PONG");
   } else if (line == "STOP") {
@@ -289,7 +276,6 @@ static void pollSensor() {
 static void updateTrial() {
   if (stage == IDLE || stage == FAULT) return;
   uint32_t now = millis();
-  if (estopActive()) { enterFault("ESTOP"); return; }
   if ((uint32_t)(now - lastHostMs) > HOST_TIMEOUT_MS) { enterFault("HOST_TIMEOUT"); return; }
   if (strcmp(sensorStatus, "OK")) {
     if (++sensorFailures >= 5) enterFault("SFM_READ");
@@ -333,9 +319,6 @@ void setup() {
   pinMode(PIN_PPV_PWM, OUTPUT);
   analogWriteResolution(12);
   safeOutputs();
-#if USE_D8_ESTOP_INPUT
-  pinMode(PIN_ESTOP, INPUT_PULLUP);
-#endif
   digitalWrite(SDA_PIN, HIGH); pinMode(SDA_PIN, OUTPUT_OPEN_DRAIN);
   digitalWrite(SCL_PIN, HIGH); pinMode(SCL_PIN, OUTPUT_OPEN_DRAIN);
   for (uint8_t i = 0; i < 9; ++i) { sclLow(); sclHigh(); }
